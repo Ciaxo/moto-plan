@@ -43,7 +43,7 @@ async function start() {
     main.replaceChildren(element('p', 'card', databaseError));
     return;
   }
-  startTheme();
+  await startTheme();
   startRouter(Object.keys(screens), (name) => {
     main.replaceChildren(screens[name]());
     markTab(name);
