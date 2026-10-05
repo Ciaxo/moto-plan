@@ -1,0 +1,25 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: var(--fs-16);
+  line-height: var(--lh-body);
+}
+
+:focus-visible {
+  outline: var(--border-thick) solid var(--accent);
+  outline-offset: var(--focus-offset);
+}
+
+.screen {
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding: var(--screen-pad);
+}
