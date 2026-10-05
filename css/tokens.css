@@ -72,6 +72,7 @@
   --r-full: 999px;
 
   /* Borders and focus */
+  --hairline: 1px;
   --border-thick: 2px;
   --focus-offset: 2px;
 
@@ -79,6 +80,7 @@
   --tap: 44px;
   --control: 48px;
   --icon: 24px;
+  --icon-dash: 1.5 3.5;
   --nav-height: 70px;
   --content-max: 1040px;
   --sidebar-width: 240px;
