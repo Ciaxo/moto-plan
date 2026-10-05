@@ -1,3 +1,4 @@
+import { openDatabase } from './db.js';
 import { startRouter } from './router.js';
 import { startTheme } from './theme.js';
 import { renderStart } from './views/start.js';
@@ -31,8 +32,13 @@ function markTab(name) {
   }
 }
 
-startTheme();
-startRouter(Object.keys(screens), (name) => {
-  main.replaceChildren(screens[name]());
-  markTab(name);
-});
+async function start() {
+  await openDatabase();
+  startTheme();
+  startRouter(Object.keys(screens), (name) => {
+    main.replaceChildren(screens[name]());
+    markTab(name);
+  });
+}
+
+start();
