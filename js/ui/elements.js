@@ -1,12 +1,19 @@
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
+export function element(tag, className, text) {
+  const node = document.createElement(tag);
+  if (className) {
+    node.className = className;
+  }
+  if (text) {
+    node.textContent = text;
+  }
+  return node;
+}
+
 export function screenHeader(title, { action } = {}) {
-  const header = document.createElement('header');
-  header.className = 'screen-header';
-  const heading = document.createElement('h1');
-  heading.className = 'screen-title';
-  heading.textContent = title;
-  header.append(heading);
+  const header = element('header', 'screen-header');
+  header.append(element('h1', 'screen-title', title));
   if (action) {
     header.append(action);
   }
@@ -24,8 +31,7 @@ export function icon(name) {
 }
 
 export function backLink(href, label) {
-  const link = document.createElement('a');
-  link.className = 'back-link';
+  const link = element('a', 'back-link');
   link.href = href;
   link.append(icon('back'), label);
   return link;
