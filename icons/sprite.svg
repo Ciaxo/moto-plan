@@ -74,4 +74,14 @@
       <path d="M15 6l-6 6 6 6"/>
     </g>
   </symbol>
+  <symbol id="motorcycle-sketch" viewBox="0 0 150 84">
+    <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5 5">
+      <circle cx="26" cy="58" r="24"/>
+      <circle cx="124" cy="58" r="24"/>
+      <path d="M26 58L52 18h50"/>
+      <path d="M52 18l24 38h24l12-18"/>
+      <path d="M124 58L96 6"/>
+      <path d="M88 6h16"/>
+    </g>
+  </symbol>
 </svg>

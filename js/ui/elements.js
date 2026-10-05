@@ -11,8 +11,11 @@ export function element(tag, className, text) {
   return node;
 }
 
-export function screenHeader(title, { action } = {}) {
+export function screenHeader(title, { eyebrow, action } = {}) {
   const header = element('header', 'screen-header');
+  if (eyebrow) {
+    header.append(element('p', 'eyebrow', eyebrow));
+  }
   header.append(element('h1', 'screen-title', title));
   if (action) {
     header.append(action);
