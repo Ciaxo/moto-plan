@@ -71,9 +71,14 @@
   --r-sheet: 24px;
   --r-full: 999px;
 
+  /* Borders and focus */
+  --border-thick: 2px;
+  --focus-offset: 2px;
+
   /* Sizes */
   --tap: 44px;
   --control: 48px;
+  --icon: 24px;
   --nav-height: 70px;
   --content-max: 1040px;
   --sidebar-width: 240px;
