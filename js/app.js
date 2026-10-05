@@ -1,6 +1,7 @@
 import { openDatabase } from './db.js';
 import { startRouter } from './router.js';
 import { startTheme } from './theme.js';
+import { element } from './ui/elements.js';
 import { renderStart } from './views/start.js';
 import { renderPlan } from './views/plan.js';
 import { renderKnowledge } from './views/knowledge.js';
@@ -19,6 +20,9 @@ const screens = {
   komponenty: renderComponents,
 };
 
+const databaseError = 'Nie da się otworzyć bazy danych. Przeglądarka nie pozwala tej stronie '
+  + 'zapisywać danych na urządzeniu. Zezwól na to w ustawieniach witryny i odśwież stronę.';
+
 const main = document.querySelector('main');
 const tabs = document.querySelectorAll('nav a');
 
@@ -33,7 +37,12 @@ function markTab(name) {
 }
 
 async function start() {
-  await openDatabase();
+  try {
+    await openDatabase();
+  } catch {
+    main.replaceChildren(element('p', 'card', databaseError));
+    return;
+  }
   startTheme();
   startRouter(Object.keys(screens), (name) => {
     main.replaceChildren(screens[name]());
