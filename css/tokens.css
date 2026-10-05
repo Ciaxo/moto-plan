@@ -66,6 +66,7 @@
   /* Radii */
   --r-sm: 10px;
   --r-md: 12px;
+  --r-segment: 14px;
   --r-lg: 16px;
   --r-xl: 20px;
   --r-sheet: 24px;
@@ -73,15 +74,24 @@
 
   /* Borders and focus */
   --hairline: 1px;
+  --border: 1.5px;
   --border-thick: 2px;
   --focus-offset: 2px;
 
   /* Sizes */
   --tap: 44px;
   --control: 48px;
+  --row-min: 58px;
+  --check: 24px;
   --icon: 24px;
   --icon-dash: 1.5 3.5;
+  --illustration: 150px;
+  --bar: 10px;
+  --bar-sm: 6px;
+  --handle-width: 40px;
+  --handle-height: 4px;
   --nav-height: 70px;
+  --sheet-max: 480px;
   --content-max: 1040px;
   --sidebar-width: 240px;
 
