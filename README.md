@@ -11,7 +11,7 @@ Early development.
 ### Progress
 
 - [x] App shell and navigation
-- [ ] UI components, light and dark theme
+- [x] UI components, light and dark theme
 - [ ] Local database and content packs
 - [ ] Plan screen
 - [ ] Backup export and import
