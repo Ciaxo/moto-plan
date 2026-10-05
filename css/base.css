@@ -22,4 +22,5 @@ body {
   max-width: var(--content-max);
   margin-inline: auto;
   padding: var(--screen-pad);
+  padding-bottom: calc(var(--nav-height) + var(--screen-pad));
 }

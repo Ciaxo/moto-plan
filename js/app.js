@@ -16,7 +16,19 @@ const screens = {
 };
 
 const main = document.querySelector('main');
+const tabs = document.querySelectorAll('nav a');
+
+function markTab(name) {
+  for (const tab of tabs) {
+    if (tab.hash === `#/${name}`) {
+      tab.setAttribute('aria-current', 'page');
+    } else {
+      tab.removeAttribute('aria-current');
+    }
+  }
+}
 
 startRouter(Object.keys(screens), (name) => {
   main.replaceChildren(screens[name]());
+  markTab(name);
 });
