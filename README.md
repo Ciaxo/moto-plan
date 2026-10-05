@@ -10,7 +10,7 @@ Early development.
 
 ### Progress
 
-- [ ] App shell and navigation
+- [x] App shell and navigation
 - [ ] UI components, light and dark theme
 - [ ] Local database and content packs
 - [ ] Plan screen
@@ -112,6 +112,7 @@ css/                    styles, design tokens in tokens.css
 js/                     app code (ES modules)
 js/lib/                 pure functions, covered by tests
 js/views/               one module per screen
+icons/                  icon sprite and app icons
 data/example-pack.json  example content pack
 tests/                  browser test page
 ```
