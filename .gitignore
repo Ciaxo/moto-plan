@@ -1,0 +1,10 @@
+# Personal backups and private content packs
+moto-plan-*.json
+prywatne/
+kopie/
+*.backup.json
+
+# Editor and OS files
+.vscode/
+.DS_Store
+Thumbs.db

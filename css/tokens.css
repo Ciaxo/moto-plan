@@ -1,0 +1,120 @@
+/*
+  Design tokens. The only place where colours, sizes and spacing are defined.
+  <html> always carries data-theme="light" or data-theme="dark".
+*/
+
+:root {
+  color-scheme: light;
+
+  /* Background and surfaces */
+  --bg: #F2F3F1;
+  --surface: #FFFFFF;
+  --surface-inset: #F2F3F1;
+  --nav-bg: #FFFFFF;
+  --scrim: rgba(20, 24, 27, 0.5);
+
+  /* Text */
+  --ink: #14181B;
+  --ink-2: #545C62;
+  --ink-3: #646C72;
+  --ink-disabled: #6F777C;
+
+  /* Lines and tracks */
+  --line: #E1E4E0;
+  --line-soft: #ECEEEB;
+  --track: #E7E9E6;
+  --border-strong: #B4BAB6;
+  --ring: #8A9196;
+  --gauge-tick: #9AA1A5;
+
+  /* Accent */
+  --accent: #1B5E7B;
+  --on-accent: #FFFFFF;
+  --accent-soft: color-mix(in srgb, var(--accent) 14%, var(--surface));
+
+  /* Warning */
+  --warn: #B45F06;
+
+  /* Type */
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --fs-12: 0.75rem;
+  --fs-14: 0.875rem;
+  --fs-16: 1rem;
+  --fs-20: 1.25rem;
+  --fs-24: 1.5rem;
+  --fs-28: 1.75rem;
+  --fs-40: 2.5rem;
+  --lh-tight: 1.15;
+  --lh-body: 1.4;
+  --lh-text: 1.5;
+  --fw-regular: 400;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --ls-eyebrow: 0.08em;
+  --ls-display: -0.02em;
+
+  /* Spacing */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --screen-pad: 20px;
+
+  /* Radii */
+  --r-sm: 10px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --r-sheet: 24px;
+  --r-full: 999px;
+
+  /* Sizes */
+  --tap: 44px;
+  --control: 48px;
+  --nav-height: 70px;
+  --content-max: 1040px;
+  --sidebar-width: 240px;
+
+  /* Motion */
+  --dur-fast: 120ms;
+  --dur-sheet: 220ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0F1214;
+  --surface: #181C1F;
+  --surface-inset: #20262A;
+  --nav-bg: #14181B;
+  --scrim: rgba(0, 0, 0, 0.6);
+
+  --ink: #ECEFEE;
+  --ink-2: #A9B1B5;
+  --ink-3: #8A9399;
+  --ink-disabled: #8A9399;
+
+  --line: #2A3035;
+  --line-soft: #262C30;
+  --track: #2A3035;
+  --border-strong: #4A5359;
+  --ring: #7A848A;
+  --gauge-tick: #5E676D;
+
+  --accent: #7CC0DE;
+  --on-accent: #0F1214;
+  --accent-soft: color-mix(in srgb, var(--accent) 20%, var(--surface));
+
+  --warn: #E0A050;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-sheet: 0ms;
+  }
+}

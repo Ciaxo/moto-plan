@@ -1,0 +1,456 @@
+{
+  "app": "moto-plan",
+  "type": "content",
+  "formatVersion": 1,
+  "packId": "example-kat-a",
+  "title": "Przykład: prawo jazdy kat. A i pierwszy motocykl",
+  "version": 1,
+  "_uwaga": "Ogólny przykład do pokazania aplikacji i do testów. Kwoty i terminy są orientacyjne. Puste odpowiedzi są celowe: pokazują stan bez treści.",
+  "stages": [
+    {
+      "id": "ex-stage-1",
+      "order": 1,
+      "title": "Przygotowanie",
+      "period": "paź–lis 2026"
+    },
+    {
+      "id": "ex-stage-2",
+      "order": 2,
+      "title": "Formalności",
+      "period": "lis–gru 2026"
+    },
+    {
+      "id": "ex-stage-3",
+      "order": 3,
+      "title": "Teoria",
+      "period": "zima 2026/27",
+      "headline": "Zima z teorią"
+    },
+    {
+      "id": "ex-stage-4",
+      "order": 4,
+      "title": "Jazdy i egzamin",
+      "period": "wiosna 2027"
+    },
+    {
+      "id": "ex-stage-5",
+      "order": 5,
+      "title": "Sprzęt i oszczędzanie",
+      "period": "2027–2028"
+    },
+    {
+      "id": "ex-stage-6",
+      "order": 6,
+      "title": "Zakup motocykla",
+      "period": "połowa 2028"
+    },
+    {
+      "id": "ex-stage-7",
+      "order": 7,
+      "title": "Pierwszy sezon",
+      "period": "lato 2028"
+    }
+  ],
+  "steps": [
+    {
+      "id": "ex-step-1-1",
+      "stageId": "ex-stage-1",
+      "order": 1,
+      "title": "Ustawić stały przelew na oszczędności",
+      "dueDate": "2026-10",
+      "cost": null,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-1-2",
+      "stageId": "ex-stage-1",
+      "order": 2,
+      "title": "Zapytać 2–3 szkoły jazdy o terminy na wiosnę",
+      "dueDate": "2026-11",
+      "cost": null,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-2-1",
+      "stageId": "ex-stage-2",
+      "order": 1,
+      "title": "Badanie lekarskie",
+      "dueDate": "2026-11",
+      "cost": null,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-2-2",
+      "stageId": "ex-stage-2",
+      "order": 2,
+      "title": "Zdjęcie do dokumentów",
+      "dueDate": "2026-11",
+      "cost": null,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-2-3",
+      "stageId": "ex-stage-2",
+      "order": 3,
+      "title": "Założyć PKK w wydziale komunikacji",
+      "dueDate": "2026-12",
+      "cost": null,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-2-4",
+      "stageId": "ex-stage-2",
+      "order": 4,
+      "title": "Zapisać się na kurs kat. A",
+      "dueDate": "2026-12",
+      "cost": null,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-3-1",
+      "stageId": "ex-stage-3",
+      "order": 1,
+      "title": "Przejść kurs teorii",
+      "dueDate": "2027-01",
+      "cost": null,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-3-2",
+      "stageId": "ex-stage-3",
+      "order": 2,
+      "title": "Przerobić testy egzaminacyjne",
+      "dueDate": "2027-02",
+      "cost": null,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-3-3",
+      "stageId": "ex-stage-3",
+      "order": 3,
+      "title": "Egzamin teoretyczny w WORD",
+      "dueDate": "2027-02",
+      "cost": 59,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-3-4",
+      "stageId": "ex-stage-3",
+      "order": 4,
+      "title": "Kupić kask i rękawice",
+      "dueDate": "2027-02",
+      "cost": null,
+      "hint": "Przymierzyć w sklepie, norma ECE 22.06."
+    },
+    {
+      "id": "ex-step-4-1",
+      "stageId": "ex-stage-4",
+      "order": 1,
+      "title": "Odbyć 20 godzin jazd",
+      "dueDate": "2027-04",
+      "cost": null,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-4-2",
+      "stageId": "ex-stage-4",
+      "order": 2,
+      "title": "Egzamin praktyczny w WORD",
+      "dueDate": "2027-05",
+      "cost": 238,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-4-3",
+      "stageId": "ex-stage-4",
+      "order": 3,
+      "title": "Odebrać prawo jazdy",
+      "dueDate": "2027-06",
+      "cost": 100,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-5-1",
+      "stageId": "ex-stage-5",
+      "order": 1,
+      "title": "Jazda testowa wybranego motocykla",
+      "dueDate": "2027-06",
+      "cost": null,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-5-2",
+      "stageId": "ex-stage-5",
+      "order": 2,
+      "title": "Kupić resztę odzieży ochronnej",
+      "dueDate": "2027",
+      "cost": null,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-5-3",
+      "stageId": "ex-stage-5",
+      "order": 3,
+      "title": "Jazdy doszkalające przed zakupem",
+      "dueDate": "2028-04",
+      "cost": null,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-6-1",
+      "stageId": "ex-stage-6",
+      "order": 1,
+      "title": "Zamówić motocykl u dealera",
+      "dueDate": "2028",
+      "cost": null,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-6-2",
+      "stageId": "ex-stage-6",
+      "order": 2,
+      "title": "Wykupić OC i zdecydować o AC",
+      "dueDate": "2028",
+      "cost": null,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-6-3",
+      "stageId": "ex-stage-6",
+      "order": 3,
+      "title": "Zarejestrować motocykl",
+      "dueDate": "2028",
+      "cost": 120,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-6-4",
+      "stageId": "ex-stage-6",
+      "order": 4,
+      "title": "Kupić zabezpieczenia i lokalizator",
+      "dueDate": "2028",
+      "cost": null,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-7-1",
+      "stageId": "ex-stage-7",
+      "order": 1,
+      "title": "Docieranie: pierwsze 1000 km spokojnie",
+      "dueDate": "2028",
+      "cost": null,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-7-2",
+      "stageId": "ex-stage-7",
+      "order": 2,
+      "title": "Pierwszy serwis po docieraniu",
+      "dueDate": "2028",
+      "cost": null,
+      "hint": ""
+    },
+    {
+      "id": "ex-step-7-3",
+      "stageId": "ex-stage-7",
+      "order": 3,
+      "title": "Szkolenie z techniki jazdy",
+      "dueDate": "2028",
+      "cost": null,
+      "hint": ""
+    }
+  ],
+  "categories": [
+    {
+      "id": "ex-cat-przepisy",
+      "order": 1,
+      "title": "Przepisy"
+    },
+    {
+      "id": "ex-cat-parkowanie",
+      "order": 2,
+      "title": "Parkowanie"
+    },
+    {
+      "id": "ex-cat-obsluga",
+      "order": 3,
+      "title": "Obsługa"
+    },
+    {
+      "id": "ex-cat-ubezpieczenia",
+      "order": 4,
+      "title": "Ubezpieczenia"
+    },
+    {
+      "id": "ex-cat-wypadki",
+      "order": 5,
+      "title": "Wypadki"
+    },
+    {
+      "id": "ex-cat-policja",
+      "order": 6,
+      "title": "Policja"
+    },
+    {
+      "id": "ex-cat-koszty",
+      "order": 7,
+      "title": "Koszty"
+    },
+    {
+      "id": "ex-cat-kradziez",
+      "order": 8,
+      "title": "Kradzież"
+    }
+  ],
+  "questions": [
+    {
+      "id": "ex-q-oc-ac",
+      "categoryId": "ex-cat-ubezpieczenia",
+      "order": 1,
+      "question": "Czym różni się OC od AC?",
+      "answer": "OC jest obowiązkowe. Pokrywa szkody, które wyrządzisz innym, ale nie naprawi Twojego motocykla.\n\nAC jest dobrowolne. Chroni Twój motocykl przy kradzieży, wywrotce z Twojej winy, wandalizmie i zdarzeniach losowych, na przykład gradzie.\n\nPrzed zakupem AC sprawdź:\n- zakres: kradzież i szkody z własnej winy\n- udział własny\n- wymagane zabezpieczenia przed kradzieżą",
+      "sourceTitle": "mubi.pl · ubezpieczenie motocykla",
+      "sourceUrl": "https://mubi.pl/poradniki/ile-kosztuje-ubezpieczenie-motocykla/"
+    },
+    {
+      "id": "ex-q-immobilizer",
+      "categoryId": "ex-cat-kradziez",
+      "order": 1,
+      "question": "Czym jest immobilizer i jak działa?",
+      "answer": "To elektroniczna blokada zapłonu. W kluczyku jest chip z unikalnym kodem, a przy stacyjce antena, która go odczytuje. Bez właściwego kodu komputer nie uruchomi silnika.\n\nDziała sam, niczego nie włączasz. Nie chroni przed wyniesieniem motocykla.",
+      "sourceTitle": "",
+      "sourceUrl": ""
+    },
+    {
+      "id": "ex-q-miedzy-autami",
+      "categoryId": "ex-cat-przepisy",
+      "order": 1,
+      "question": "Czy mogę jechać między rzędami aut na światłach?",
+      "answer": "",
+      "sourceTitle": "",
+      "sourceUrl": ""
+    },
+    {
+      "id": "ex-q-parkowanie-przewrocenie",
+      "categoryId": "ex-cat-parkowanie",
+      "order": 1,
+      "question": "Jak zaparkować, żeby auto nie przewróciło motocykla?",
+      "answer": "",
+      "sourceTitle": "",
+      "sourceUrl": ""
+    },
+    {
+      "id": "ex-q-kolizja",
+      "categoryId": "ex-cat-wypadki",
+      "order": 1,
+      "question": "Co zrobić po kolizji?",
+      "answer": "",
+      "sourceTitle": "",
+      "sourceUrl": ""
+    },
+    {
+      "id": "ex-q-lancuch",
+      "categoryId": "ex-cat-obsluga",
+      "order": 1,
+      "question": "Jak smarować i napinać łańcuch?",
+      "answer": "",
+      "sourceTitle": "",
+      "sourceUrl": ""
+    }
+  ],
+  "goals": [
+    {
+      "id": "ex-goal-1",
+      "order": 1,
+      "title": "Prawo jazdy i sprzęt"
+    },
+    {
+      "id": "ex-goal-2",
+      "order": 2,
+      "title": "Motocykl"
+    }
+  ],
+  "costs": [
+    {
+      "id": "ex-cost-kurs",
+      "order": 1,
+      "title": "Kurs kat. A",
+      "amount": 3500,
+      "group": "once",
+      "goalId": "ex-goal-1",
+      "date": "2026-12"
+    },
+    {
+      "id": "ex-cost-badanie",
+      "order": 2,
+      "title": "Badanie lekarskie i zdjęcie",
+      "amount": 200,
+      "group": "once",
+      "goalId": "ex-goal-1",
+      "date": "2026-11"
+    },
+    {
+      "id": "ex-cost-egzaminy",
+      "order": 3,
+      "title": "Egzaminy i dokument",
+      "amount": 400,
+      "group": "once",
+      "goalId": "ex-goal-1",
+      "date": "2027-05"
+    },
+    {
+      "id": "ex-cost-odziez",
+      "order": 4,
+      "title": "Odzież ochronna",
+      "amount": 4000,
+      "group": "once",
+      "goalId": "ex-goal-1",
+      "date": "2027"
+    },
+    {
+      "id": "ex-cost-motocykl",
+      "order": 5,
+      "title": "Motocykl",
+      "amount": 20000,
+      "group": "once",
+      "goalId": "ex-goal-2",
+      "date": "2028"
+    },
+    {
+      "id": "ex-cost-rejestracja",
+      "order": 6,
+      "title": "Rejestracja",
+      "amount": 120,
+      "group": "once",
+      "goalId": "ex-goal-2",
+      "date": "2028"
+    },
+    {
+      "id": "ex-cost-zabezpieczenia",
+      "order": 7,
+      "title": "Zabezpieczenia i akcesoria",
+      "amount": 800,
+      "group": "once",
+      "goalId": "ex-goal-2",
+      "date": "2028"
+    },
+    {
+      "id": "ex-cost-oc",
+      "order": 8,
+      "title": "OC, pierwszy rok",
+      "amount": 600,
+      "group": "yearly",
+      "goalId": "ex-goal-2",
+      "date": "2028"
+    },
+    {
+      "id": "ex-cost-rezerwa",
+      "order": 9,
+      "title": "Rezerwa na niespodzianki",
+      "amount": 380,
+      "group": "hidden",
+      "goalId": "ex-goal-2",
+      "date": ""
+    }
+  ]
+}
