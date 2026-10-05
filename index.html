@@ -71,6 +71,69 @@
       <label class="chip"><input type="radio" name="category">Obsługa</label>
       <label class="chip"><input type="radio" name="category">Ubezpieczenia</label>
     </fieldset>
+    <h2 class="section-title">Wiersze listy</h2>
+    <ul class="card list">
+      <li class="row">
+        <label class="check">
+          <input type="checkbox" aria-label="Przejść kurs teorii" checked>
+          <svg class="check-mark" aria-hidden="true"><use href="./icons/sprite.svg#check"></use></svg>
+        </label>
+        <button class="row-main" type="button">
+          <span class="row-title">Przejść kurs teorii</span>
+          <span class="row-meta">zrobione 14 stycznia</span>
+        </button>
+      </li>
+      <li class="row">
+        <label class="check">
+          <input type="checkbox" aria-label="Przerobić testy egzaminacyjne">
+          <svg class="check-mark" aria-hidden="true"><use href="./icons/sprite.svg#check"></use></svg>
+        </label>
+        <button class="row-main" type="button">
+          <span class="row-title">Przerobić testy egzaminacyjne</span>
+          <span class="row-meta">luty</span>
+        </button>
+      </li>
+      <li class="row">
+        <button class="row-main" type="button">
+          <span class="row-title">Wpłata co miesiąc</span>
+          <span class="row-meta">Ustaw</span>
+        </button>
+      </li>
+    </ul>
+    <h2 class="section-title">Przełącznik segmentowy</h2>
+    <section class="card">
+      <fieldset class="segmented" aria-label="Wygląd">
+        <label class="segment"><input type="radio" name="look" checked>Jasny</label>
+        <label class="segment"><input type="radio" name="look">Ciemny</label>
+        <label class="segment"><input type="radio" name="look">Jak system</label>
+      </fieldset>
+      <fieldset class="segmented segmented-accent" aria-label="Status">
+        <label class="segment"><input type="radio" name="status">Nie wiem</label>
+        <label class="segment"><input type="radio" name="status" checked>Umiem</label>
+      </fieldset>
+    </section>
+    <h2 class="section-title">Pola formularza</h2>
+    <section class="card">
+      <label class="field">
+        <span class="field-label">Tytuł</span>
+        <input class="input" type="text" placeholder="np. Badanie lekarskie">
+      </label>
+      <label class="field">
+        <span class="field-label">Etap</span>
+        <span class="select">
+          <select class="input">
+            <option>1 · Przygotowanie</option>
+            <option>2 · Formalności</option>
+            <option>3 · Teoria</option>
+          </select>
+          <svg class="icon" aria-hidden="true"><use href="./icons/sprite.svg#chevron-down"></use></svg>
+        </span>
+      </label>
+      <label class="field">
+        <span class="field-label">Notatka</span>
+        <textarea class="input" rows="3"></textarea>
+      </label>
+    </section>
   </template>
 </body>
 </html>
