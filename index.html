@@ -34,5 +34,43 @@
       Motocykl
     </a>
   </nav>
+  <template class="components-preview">
+    <header class="screen-header">
+      <p class="eyebrow">Roboczy ekran</p>
+      <h1 class="screen-title">Komponenty</h1>
+    </header>
+    <h2 class="section-title">Karta</h2>
+    <section class="card">
+      <h2 class="card-title">Tytuł karty</h2>
+      <p>Karta ma tło powierzchni, zaokrąglone rogi i nie ma cienia ani obramowania.</p>
+    </section>
+    <h2 class="section-title">Przyciski</h2>
+    <section class="card">
+      <button class="button button-primary" type="button">Zapisz krok</button>
+      <button class="button button-secondary" type="button">Importuj z pliku</button>
+      <button class="button button-add" type="button">
+        <svg class="icon" aria-hidden="true"><use href="./icons/sprite.svg#plus"></use></svg>
+        Dodaj krok
+      </button>
+      <button class="button" type="button">Anuluj</button>
+      <a class="button button-tonal" href="#/budzet">Zobacz budżet</a>
+    </section>
+    <button class="icon-button" type="button" aria-label="Dodaj">
+      <svg class="icon" aria-hidden="true"><use href="./icons/sprite.svg#plus"></use></svg>
+    </button>
+    <h2 class="section-title">Pasek postępu</h2>
+    <section class="card">
+      <progress class="progress" value="0.4" aria-label="Postęp etapu"></progress>
+      <progress class="progress progress-sm" value="0.7" aria-label="Postęp kategorii"></progress>
+    </section>
+    <h2 class="section-title">Znacznik kategorii</h2>
+    <fieldset class="chips" aria-label="Kategoria">
+      <label class="chip"><input type="radio" name="category" checked>Wszystkie</label>
+      <label class="chip"><input type="radio" name="category">Przepisy</label>
+      <label class="chip"><input type="radio" name="category">Parkowanie</label>
+      <label class="chip"><input type="radio" name="category">Obsługa</label>
+      <label class="chip"><input type="radio" name="category">Ubezpieczenia</label>
+    </fieldset>
+  </template>
 </body>
 </html>

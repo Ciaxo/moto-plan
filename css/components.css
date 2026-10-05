@@ -45,3 +45,169 @@
 .tab[aria-current="page"] .tab-icon {
   background: var(--accent-soft);
 }
+
+.screen-header {
+  display: grid;
+  gap: var(--sp-1);
+}
+
+.eyebrow,
+.card-title {
+  color: var(--ink-2);
+  font-size: var(--fs-12);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-eyebrow);
+  text-transform: uppercase;
+}
+
+.screen-title {
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-display);
+  line-height: var(--lh-tight);
+}
+
+.section-title {
+  margin-top: var(--sp-2);
+  font-size: var(--fs-20);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  border-radius: var(--r-xl);
+  background: var(--surface);
+}
+
+.icon {
+  flex: none;
+  width: var(--icon);
+  height: var(--icon);
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: var(--control);
+  padding-inline: var(--sp-5);
+  border: var(--border) solid transparent;
+  border-radius: var(--r-md);
+  background: none;
+  color: var(--ink);
+  font-weight: var(--fw-semibold);
+  text-decoration: none;
+}
+
+.button-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: var(--fw-bold);
+}
+
+.button-secondary {
+  border-color: var(--border-strong);
+}
+
+.button-add {
+  border-color: var(--border-strong);
+  border-style: dashed;
+  color: var(--accent);
+}
+
+.button-tonal {
+  display: inline-flex;
+  align-self: center;
+  min-height: var(--tap);
+  padding-inline: var(--sp-6);
+  border-radius: var(--r-full);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: var(--fw-bold);
+}
+
+.icon-button {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--control);
+  height: var(--control);
+  border: none;
+  border-radius: var(--r-full);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.progress {
+  display: block;
+  width: 100%;
+  height: var(--bar);
+  border: none;
+  border-radius: var(--r-full);
+  background: var(--track);
+  appearance: none;
+}
+
+.progress-sm {
+  height: var(--bar-sm);
+}
+
+.progress::-webkit-progress-bar {
+  border-radius: var(--r-full);
+  background: var(--track);
+}
+
+.progress::-webkit-progress-value {
+  border-radius: var(--r-full);
+  background: var(--accent);
+}
+
+.progress::-moz-progress-bar {
+  border-radius: var(--r-full);
+  background: var(--accent);
+}
+
+.chips {
+  display: flex;
+  gap: var(--sp-2);
+  margin-inline: calc(-1 * var(--screen-pad));
+  padding: var(--sp-1) var(--screen-pad);
+  overflow-x: auto;
+}
+
+.chip {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  min-height: var(--tap);
+  padding-inline: var(--sp-5);
+  border: var(--border) solid var(--line);
+  border-radius: var(--r-full);
+  background: var(--surface);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+}
+
+.chip input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+}
+
+.chip:has(:checked) {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--surface);
+}
+
+.chip:has(:focus-visible) {
+  outline: var(--border-thick) solid var(--accent);
+  outline-offset: var(--focus-offset);
+}
