@@ -1,5 +1,7 @@
-import { screenHeader } from '../ui/elements.js';
+import { screenHeader, backLink } from '../ui/elements.js';
 
 export function renderData() {
-  return screenHeader('Dane i ustawienia');
+  const screen = document.createDocumentFragment();
+  screen.append(backLink('#/start', 'Start'), screenHeader('Dane i ustawienia'));
+  return screen;
 }

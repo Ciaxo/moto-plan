@@ -48,7 +48,30 @@
 
 .screen-header {
   display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  gap: var(--sp-1) var(--sp-4);
+}
+
+.screen-header > * {
+  grid-column: 1;
+}
+
+.screen-header > .icon-button {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
   gap: var(--sp-1);
+  min-height: var(--tap);
+  margin-left: calc(-1 * var(--sp-2));
+  color: var(--ink);
+  font-weight: var(--fw-semibold);
+  text-decoration: none;
 }
 
 .eyebrow,
