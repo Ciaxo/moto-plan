@@ -1,4 +1,5 @@
 import { startRouter } from './router.js';
+import { startTheme } from './theme.js';
 import { renderStart } from './views/start.js';
 import { renderPlan } from './views/plan.js';
 import { renderKnowledge } from './views/knowledge.js';
@@ -30,6 +31,7 @@ function markTab(name) {
   }
 }
 
+startTheme();
 startRouter(Object.keys(screens), (name) => {
   main.replaceChildren(screens[name]());
   markTab(name);
