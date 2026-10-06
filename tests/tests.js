@@ -1,5 +1,5 @@
 import { backupAge, mergeBackup, needsBackup, validateBackup } from '../js/lib/backup.js';
-import { daysBetween, formatDate, localDate } from '../js/lib/dates.js';
+import { addMonths, daysBetween, formatDate, formatMonth, localDate } from '../js/lib/dates.js';
 import { formatAmount, plural } from '../js/lib/format.js';
 import { nextOrder } from '../js/lib/order.js';
 import { editRecord, mergePack, validatePack } from '../js/lib/pack.js';
@@ -109,6 +109,27 @@ test('daty: pełne dni między datami, także przez zmianę czasu i rok', () => 
       daysBetween('2026-12-31', '2027-01-01'),
     ],
     [0, 1, 2, 1],
+  );
+});
+
+test('daty: miesiąc z rokiem w mianowniku, także w bieżącym roku', () => {
+  assertEqual(
+    [formatMonth('2026-10'), formatMonth('2027-01'), formatMonth('2028-06')],
+    ['październik 2026', 'styczeń 2027', 'czerwiec 2028'],
+  );
+});
+
+test('daty: przesunięcie miesiąca, także przez koniec roku', () => {
+  assertEqual(
+    [
+      addMonths('2026-10', 0),
+      addMonths('2026-10', 2),
+      addMonths('2026-10', 3),
+      addMonths('2026-10', 12),
+      addMonths('2026-12', 1),
+      addMonths('2026-10', 27),
+    ],
+    ['2026-10', '2026-12', '2027-01', '2027-10', '2027-01', '2029-01'],
   );
 });
 

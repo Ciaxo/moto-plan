@@ -1,4 +1,5 @@
 const DAY = 24 * 60 * 60 * 1000;
+const months = new Intl.DateTimeFormat('pl-PL', { month: 'long', year: 'numeric' });
 
 // Not toISOString(), which gives the UTC date: just after midnight it would still be yesterday.
 export function localDate(date) {
@@ -20,6 +21,17 @@ export function formatDate(text, today) {
     options.year = 'numeric';
   }
   return new Intl.DateTimeFormat('pl-PL', options).format(new Date(year, month - 1, day || 1));
+}
+
+// Unlike formatDate, always with the year, also in the current one.
+export function formatMonth(month) {
+  const [year, number] = month.split('-').map(Number);
+  return months.format(new Date(year, number - 1));
+}
+
+export function addMonths(month, count) {
+  const [year, number] = month.split('-').map(Number);
+  return localDate(new Date(year, number - 1 + count)).slice(0, 7);
 }
 
 // Both dates are read as UTC midnights, so a daylight saving change does not shorten a day.
