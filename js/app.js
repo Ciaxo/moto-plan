@@ -38,9 +38,9 @@ function markTab(name) {
   }
 }
 
-function show(name) {
+function show(name, entered) {
   currentScreen = name;
-  main.replaceChildren(screens[name](data));
+  main.replaceChildren(screens[name](data, entered));
   markTab(name);
 }
 
@@ -48,7 +48,7 @@ async function redraw() {
   data = await loadAll();
   const active = main.contains(document.activeElement) ? document.activeElement : null;
   const focusedId = active?.closest('[data-id]')?.dataset.id;
-  show(currentScreen);
+  show(currentScreen, false);
   if (focusedId) {
     main.querySelector(`[data-id="${CSS.escape(focusedId)}"]`)?.focus();
   }
@@ -64,7 +64,7 @@ async function start() {
   await startTheme();
   data = await loadAll();
   window.addEventListener('datachange', redraw);
-  startRouter(Object.keys(screens), show);
+  startRouter(Object.keys(screens), (name) => show(name, true));
 }
 
 start();

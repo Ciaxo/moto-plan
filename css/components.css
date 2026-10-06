@@ -294,6 +294,7 @@
   background: none;
   color: var(--ink);
   text-align: start;
+  overflow-wrap: anywhere;
 }
 
 .check + .row-main {

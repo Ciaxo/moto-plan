@@ -44,3 +44,111 @@
   color: var(--ink-2);
   font-size: var(--fs-14);
 }
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stage {
+  position: relative;
+  padding-left: calc(var(--marker) + var(--sp-3));
+}
+
+.stage:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: var(--marker);
+  bottom: calc(-1 * (var(--sp-2) + var(--marker)));
+  left: calc((var(--marker) - var(--border-thick)) / 2);
+  width: var(--border-thick);
+  background: var(--line);
+}
+
+.stage-card {
+  display: block;
+  padding: 0;
+}
+
+.stage-summary {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: var(--row-min);
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--r-xl);
+}
+
+.stage-marker {
+  position: absolute;
+  top: 50%;
+  left: calc(-1 * (var(--marker) + var(--sp-3)));
+  display: grid;
+  place-items: center;
+  width: var(--marker);
+  height: var(--marker);
+  border: var(--border-thick) solid var(--ring);
+  border-radius: var(--r-full);
+  background: var(--bg);
+  color: var(--ink-2);
+  font-weight: var(--fw-bold);
+  translate: 0 -50%;
+}
+
+.stage[aria-current="step"] .stage-marker:not(.stage-marker-closed) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.stage-marker-closed {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.stage-heading {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.stage-count {
+  color: var(--ink-2);
+  font-weight: var(--fw-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.stage[aria-current="step"] .stage-count {
+  color: var(--accent);
+}
+
+.stage-chevron {
+  color: var(--ink-2);
+  transition: rotate var(--dur-fast) var(--ease);
+}
+
+.stage-card[open] .stage-chevron {
+  rotate: 180deg;
+}
+
+.stage-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding-bottom: var(--sp-2);
+}
+
+.stage-body > .progress {
+  width: auto;
+  margin-inline: var(--sp-4);
+}
+
+.stage .row:has(:checked) .row-title {
+  color: var(--ink-2);
+}
