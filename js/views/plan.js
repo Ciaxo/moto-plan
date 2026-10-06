@@ -33,7 +33,12 @@ export function renderPlan(data, entered) {
     timeline.append(stageItem(entry, index + 1, entry === current, context));
   });
   timeline.addEventListener('change', (event) => toggleStep(steps, event.target));
-  timeline.addEventListener('click', (event) => editStep(plan, steps, event.target));
+  timeline.addEventListener('click', (event) => {
+    const step = clickedStep(steps, event.target);
+    if (step) {
+      openStepSheet(plan, { step, removeFocus: `add-step-${step.stageId}` });
+    }
+  });
   screen.append(timeline, addStage);
   return screen;
 }
@@ -49,17 +54,15 @@ function expandCurrent(current, entered) {
   lastCurrentId = id;
 }
 
-function toggleStep(steps, checkbox) {
+export function toggleStep(steps, checkbox) {
   const step = steps.find((item) => item.id === checkbox.value);
   const done = checkbox.checked;
   save('steps', { ...step, done, doneAt: done ? new Date().toISOString() : null });
 }
 
-function editStep(plan, steps, target) {
+export function clickedStep(steps, target) {
   const row = target.closest('.row-main');
-  if (row) {
-    openStepSheet(plan, { step: steps.find((step) => step.id === row.value) });
-  }
+  return row && steps.find((step) => step.id === row.value);
 }
 
 function stageItem(entry, number, isCurrent, context) {
@@ -125,7 +128,7 @@ function stageBody(entry, { plan, today }) {
   return body;
 }
 
-function stepRow(step, today) {
+export function stepRow(step, today) {
   const check = checkbox(step.title, step.id, step.done);
   check.querySelector('input').dataset.id = `done-${step.id}`;
   const main = element('button', 'row-main');

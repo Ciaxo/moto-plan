@@ -9,7 +9,7 @@ const newStep = {
   origin: 'user', packId: null, userModified: false, hint: '', done: false, doneAt: null,
 };
 
-export function openStepSheet(plan, { step, stageId }) {
+export function openStepSheet(plan, { step, stageId, removeFocus }) {
   const values = step ?? { ...emptyStep, stageId };
   const title = Object.assign(element('input', 'input'), {
     name: 'title',
@@ -51,7 +51,9 @@ export function openStepSheet(plan, { step, stageId }) {
     button('Anuluj', 'button', closeSheet),
   );
   if (step) {
-    form.append(button('Usuń krok', 'button button-secondary', () => confirmRemove(step)));
+    form.append(
+      button('Usuń krok', 'button button-secondary', () => confirmRemove(step, removeFocus)),
+    );
   }
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -62,13 +64,13 @@ export function openStepSheet(plan, { step, stageId }) {
   openSheet(step ? 'Edytuj krok' : 'Nowy krok', form);
 }
 
-function confirmRemove(step) {
+// The row is gone after the redraw, so focus moves to an element that stays. The screen that
+// opened the sheet knows which one.
+function confirmRemove(step, removeFocus) {
   openConfirm('Usunąć krok?', `Krok „${step.title}" zniknie z planu.`, 'Usuń krok', async () => {
     await remove('steps', step.id);
     closeSheet();
-    // The row is gone after the redraw, so focus moves to a button that stays in the stage.
-    const addStep = CSS.escape(`add-step-${step.stageId}`);
-    document.querySelector(`[data-id="${addStep}"]`).focus();
+    document.querySelector(`[data-id="${CSS.escape(removeFocus)}"]`).focus();
   });
 }
 

@@ -108,6 +108,27 @@
   line-height: var(--lh-tight);
 }
 
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin-top: var(--sp-2);
+}
+
+.section-header > .section-title {
+  margin-top: 0;
+}
+
+.section-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+  color: var(--accent);
+  font-weight: var(--fw-semibold);
+  text-decoration: none;
+}
+
 .card {
   display: flex;
   flex-direction: column;

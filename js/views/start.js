@@ -3,9 +3,12 @@ import { loadExample } from '../content.js';
 import { needsBackup } from '../lib/backup.js';
 import { formatMonth, localDate } from '../lib/dates.js';
 import { plural, pluralForm } from '../lib/format.js';
-import { countDone, currentStage, isClosed, planStages, progress } from '../lib/plan.js';
+import {
+  countDone, currentStage, isClosed, nextSteps, planStages, progress,
+} from '../lib/plan.js';
 import { SVG_NS, button, dot, element, screenHeader, icon } from '../ui/elements.js';
-import { stepsGenitive } from './plan.js';
+import { clickedStep, stepRow, stepsGenitive, toggleStep } from './plan.js';
+import { openStepSheet } from './step-sheet.js';
 
 const stagesGenitive = ['etapu', 'etapów', 'etapów'];
 const closedForms = ['zamknięty', 'zamknięte', 'zamkniętych'];
@@ -20,10 +23,13 @@ export function renderStart(data) {
   screen.append(header(plan, current, today, settingsLink(needsBackup(data, today))));
   if (isEmpty(data)) {
     screen.append(welcomeCard());
+    return screen;
   }
+  const steps = plan.flatMap((entry) => entry.steps);
   if (plan.length > 0) {
-    screen.append(progressCard(plan, current));
+    screen.append(progressCard(plan, steps, current));
   }
+  screen.append(...nextStepsSection(plan, steps, today));
   return screen;
 }
 
@@ -50,8 +56,7 @@ function settingsLink(warn) {
   return settings;
 }
 
-function progressCard(plan, current) {
-  const steps = plan.flatMap((entry) => entry.steps);
+function progressCard(plan, steps, current) {
   const closed = plan.filter((entry) => isClosed(entry.steps)).length;
   const caption = `${countDone(steps)} z ${plural(steps.length, stepsGenitive)} · `
     + `${closed} z ${plural(plan.length, stagesGenitive)} ${pluralForm(closed, closedForms)}`;
@@ -122,6 +127,47 @@ function segmentClass(entry, current) {
     return 'stage-segment stage-segment-closed';
   }
   return entry === current ? 'stage-segment stage-segment-current' : 'stage-segment';
+}
+
+function nextStepsSection(plan, steps, today) {
+  const allSteps = element('a', 'section-link', 'Cały plan');
+  allSteps.href = '#/plan';
+  allSteps.dataset.id = 'all-steps';
+  const heading = element('div', 'section-header');
+  heading.append(element('h2', 'section-title', 'Najbliższe kroki'), allSteps);
+  return [heading, nextStepsCard(plan, steps, today, allSteps)];
+}
+
+function nextStepsCard(plan, steps, today, allSteps) {
+  if (steps.length === 0) {
+    const toPlan = element('a', 'button button-tonal', 'Przejdź do planu');
+    toPlan.href = '#/plan';
+    return textCard('Nie masz jeszcze kroków', toPlan);
+  }
+  const next = nextSteps(plan);
+  if (next.length === 0) {
+    return textCard('Wszystkie kroki zrobione');
+  }
+  const list = element('ul', 'card list');
+  list.append(...next.map((step) => stepRow(step, today)));
+  list.addEventListener('change', (event) => {
+    toggleStep(steps, event.target);
+    // A done step leaves the list, so focus moves to a link that stays after the redraw.
+    allSteps.focus();
+  });
+  list.addEventListener('click', (event) => {
+    const step = clickedStep(steps, event.target);
+    if (step) {
+      openStepSheet(plan, { step, removeFocus: 'all-steps' });
+    }
+  });
+  return list;
+}
+
+function textCard(text, ...extra) {
+  const card = element('section', 'card');
+  card.append(element('p', null, text), ...extra);
+  return card;
 }
 
 function isEmpty(data) {
