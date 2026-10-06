@@ -1,4 +1,12 @@
 const SVG_NS = 'http://www.w3.org/2000/svg';
+const dueKinds = [['none', 'Brak'], ['year', 'Rok'], ['month', 'Miesiąc'], ['day', 'Dzień']];
+const kindByLength = { 0: 'none', 4: 'year', 7: 'month', 10: 'day' };
+// Desktop Firefox has no month picker and shows a plain text field, hence the pattern.
+const dueInputs = {
+  year: { type: 'text', inputMode: 'numeric', pattern: '\\d{4}', placeholder: 'RRRR' },
+  month: { type: 'month', pattern: '\\d{4}-\\d{2}', placeholder: 'RRRR-MM' },
+  day: { type: 'date' },
+};
 
 export function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -54,6 +62,47 @@ export function select(name, options, value) {
   const wrapper = element('span', 'select');
   wrapper.append(node, icon('chevron-down'));
   return wrapper;
+}
+
+export function dueField(dueDate) {
+  const savedKind = kindByLength[dueDate.length];
+  const kinds = element('div', 'segmented');
+  for (const [kind, label] of dueKinds) {
+    const radio = Object.assign(element('input'), {
+      type: 'radio',
+      name: 'due-kind',
+      value: kind,
+      checked: kind === savedKind,
+    });
+    const option = element('label', 'segment');
+    option.append(radio, label);
+    kinds.append(option);
+  }
+  const group = element('fieldset', 'field');
+  group.append(element('legend', 'field-label', 'Termin'), kinds);
+  let input = dueInput(savedKind, dueDate);
+  if (input) {
+    group.append(input);
+  }
+  kinds.addEventListener('change', (event) => {
+    input?.remove();
+    const kind = event.target.value;
+    input = dueInput(kind, kind === savedKind ? dueDate : '');
+    if (input) {
+      group.append(input);
+    }
+  });
+  return group;
+}
+
+function dueInput(kind, value) {
+  if (kind === 'none') {
+    return null;
+  }
+  const input = Object.assign(element('input', 'input'), dueInputs[kind]);
+  Object.assign(input, { name: 'due', required: true, value });
+  input.setAttribute('aria-label', 'Termin');
+  return input;
 }
 
 export function icon(name) {

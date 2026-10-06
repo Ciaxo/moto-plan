@@ -1,21 +1,12 @@
 import { remove, save } from '../db.js';
 import { editRecord } from '../lib/pack.js';
 import { nextOrder } from '../lib/order.js';
-import { button, element, field, select } from '../ui/elements.js';
+import { button, dueField, element, field, select } from '../ui/elements.js';
 import { closeSheet, openConfirm, openSheet } from '../ui/sheet.js';
 
 const emptyStep = { title: '', dueDate: '', cost: null, note: '' };
 const newStep = {
   origin: 'user', packId: null, userModified: false, hint: '', done: false, doneAt: null,
-};
-
-const dueKinds = [['none', 'Brak'], ['year', 'Rok'], ['month', 'Miesiąc'], ['day', 'Dzień']];
-const kindByLength = { 0: 'none', 4: 'year', 7: 'month', 10: 'day' };
-// Desktop Firefox has no month picker and shows a plain text field, hence the pattern.
-const dueInputs = {
-  year: { type: 'text', inputMode: 'numeric', pattern: '\\d{4}', placeholder: 'RRRR' },
-  month: { type: 'month', pattern: '\\d{4}-\\d{2}', placeholder: 'RRRR-MM' },
-  day: { type: 'date' },
 };
 
 export function openStepSheet(plan, { step, stageId }) {
@@ -79,47 +70,6 @@ function confirmRemove(step) {
     const addStep = CSS.escape(`add-step-${step.stageId}`);
     document.querySelector(`[data-id="${addStep}"]`).focus();
   });
-}
-
-function dueField(dueDate) {
-  const savedKind = kindByLength[dueDate.length];
-  const kinds = element('div', 'segmented');
-  for (const [kind, label] of dueKinds) {
-    const radio = Object.assign(element('input'), {
-      type: 'radio',
-      name: 'due-kind',
-      value: kind,
-      checked: kind === savedKind,
-    });
-    const option = element('label', 'segment');
-    option.append(radio, label);
-    kinds.append(option);
-  }
-  const group = element('fieldset', 'field');
-  group.append(element('legend', 'field-label', 'Termin'), kinds);
-  let input = dueInput(savedKind, dueDate);
-  if (input) {
-    group.append(input);
-  }
-  kinds.addEventListener('change', (event) => {
-    input?.remove();
-    const kind = event.target.value;
-    input = dueInput(kind, kind === savedKind ? dueDate : '');
-    if (input) {
-      group.append(input);
-    }
-  });
-  return group;
-}
-
-function dueInput(kind, value) {
-  if (kind === 'none') {
-    return null;
-  }
-  const input = Object.assign(element('input', 'input'), dueInputs[kind]);
-  Object.assign(input, { name: 'due', required: true, value });
-  input.setAttribute('aria-label', 'Termin');
-  return input;
 }
 
 function formValues(fields) {
