@@ -240,6 +240,49 @@
   margin: calc(-1 * var(--border-thick));
 }
 
+.question-header .screen-title {
+  font-size: var(--fs-24);
+  overflow-wrap: anywhere;
+}
+
+.answer p {
+  white-space: pre-line;
+}
+
+.answer ul {
+  padding-left: var(--sp-6);
+}
+
+.answer-empty {
+  color: var(--ink-2);
+}
+
+.source {
+  flex-direction: row;
+  align-items: center;
+  color: var(--ink);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.source > .icon {
+  color: var(--ink-2);
+}
+
+.source-text {
+  display: grid;
+  min-width: 0;
+}
+
+.source-label {
+  color: var(--ink-2);
+  font-size: var(--fs-14);
+}
+
+.source-title {
+  font-weight: var(--fw-semibold);
+}
+
 .backup-status {
   display: flex;
   align-items: center;

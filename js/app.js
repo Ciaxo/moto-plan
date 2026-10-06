@@ -5,6 +5,7 @@ import { element } from './ui/elements.js';
 import { renderStart } from './views/start.js';
 import { renderPlan } from './views/plan.js';
 import { renderKnowledge } from './views/knowledge.js';
+import { renderQuestion } from './views/question.js';
 import { renderBudget } from './views/budget.js';
 import { renderMotorcycle } from './views/motorcycle.js';
 import { renderData } from './views/data.js';
@@ -26,7 +27,7 @@ const databaseError = 'Nie da się otworzyć bazy danych. Przeglądarka nie pozw
 const main = document.querySelector('main');
 const tabs = document.querySelectorAll('nav a');
 let data;
-let currentScreen;
+let current;
 
 function markTab(name) {
   for (const tab of tabs) {
@@ -38,19 +39,39 @@ function markTab(name) {
   }
 }
 
-function show(name, entered) {
-  currentScreen = name;
-  main.replaceChildren(screens[name](data, entered));
+function show(entered) {
+  const { name, id } = current;
+  const screen = id === undefined
+    ? screens[name](data, entered)
+    : renderQuestion(data, entered, id);
+  main.replaceChildren(screen);
   markTab(name);
+}
+
+function focusById(id) {
+  const node = main.querySelector(`[data-id="${CSS.escape(id)}"]`);
+  node?.focus();
+  return Boolean(node);
+}
+
+function enter(name, id) {
+  const from = current;
+  current = { name, id };
+  show(true);
+  // Back from a question, the list returns to that question instead of its top.
+  const back = from?.id !== undefined && id === undefined && name === 'wiedza';
+  if (!back || !focusById(`question-${from.id}`)) {
+    scrollTo(0, 0);
+  }
 }
 
 async function redraw() {
   data = await loadAll();
   const active = main.contains(document.activeElement) ? document.activeElement : null;
   const focusedId = active?.closest('[data-id]')?.dataset.id;
-  show(currentScreen, false);
+  show(false);
   if (focusedId) {
-    main.querySelector(`[data-id="${CSS.escape(focusedId)}"]`)?.focus();
+    focusById(focusedId);
   }
 }
 
@@ -63,8 +84,10 @@ async function start() {
   }
   await startTheme();
   data = await loadAll();
+  // The browser would restore the scroll position itself, while the old screen is still shown.
+  history.scrollRestoration = 'manual';
   window.addEventListener('datachange', redraw);
-  startRouter(Object.keys(screens), (name) => show(name, true));
+  startRouter(Object.keys(screens), enter);
 }
 
 start();
