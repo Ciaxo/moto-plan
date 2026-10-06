@@ -3,7 +3,7 @@ import { backupAge, needsBackup } from '../lib/backup.js';
 import { localDate } from '../lib/dates.js';
 import { nouns, plural } from '../lib/format.js';
 import { button, dot, element, screenHeader, backLink, icon } from '../ui/elements.js';
-import { getTheme, setTheme } from '../theme.js';
+import { setTheme } from '../theme.js';
 
 const days = ['dzień', 'dni', 'dni'];
 
@@ -19,7 +19,7 @@ export function renderData(data) {
     backLink('#/start', 'Start'),
     screenHeader('Dane i ustawienia'),
     backupCard(data),
-    themeCard(),
+    themeCard(data),
     privacyCard(),
     footer(data),
   );
@@ -64,11 +64,12 @@ function backupStatus(age) {
   return `Ostatnia kopia ${plural(age, days)} temu`;
 }
 
-function themeCard() {
+function themeCard(data) {
   const card = element('section', 'card');
   const options = element('fieldset', 'segmented');
   options.setAttribute('aria-label', 'Wygląd');
-  const current = getTheme();
+  // From the data, not from theme.js: after a backup import the theme there is applied a bit later.
+  const current = data.settings.find((record) => record.id === 'theme')?.value ?? 'system';
   for (const [value, label] of themes) {
     const input = element('input');
     input.type = 'radio';

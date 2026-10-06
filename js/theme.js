@@ -5,10 +5,6 @@ const darkScheme = matchMedia('(prefers-color-scheme: dark)');
 const themeColor = document.querySelector('meta[name="theme-color"]');
 let current = 'system';
 
-export function getTheme() {
-  return current;
-}
-
 export async function setTheme(theme) {
   current = theme;
   applyTheme();
