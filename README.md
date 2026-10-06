@@ -14,7 +14,7 @@ Early development.
 - [x] UI components, light and dark theme
 - [x] Local database and content packs
 - [x] Plan screen
-- [ ] Backup export and import
+- [x] Backup export and import
 - [ ] Knowledge base
 - [ ] Budget
 - [ ] Start screen
@@ -42,7 +42,7 @@ Open `http://localhost:8000`.
 
 ## Content packs
 
-The app starts empty. Its content (stages, steps, questions, goals and costs) comes from a JSON file called a content pack. On first start the app offers to load the bundled example pack or to start with an empty plan. Stages and steps can also be added, edited and deleted in the app.
+The app starts empty. Its content (stages, steps, questions, goals and costs) comes from a JSON file called a content pack. On first start the app offers to load a pack from a file, to load the bundled example pack or to start with an empty plan. Later you load packs with the import button on the Data screen, the same one that restores backups (see [Backups](#backups)). Stages and steps can also be added, edited and deleted in the app.
 
 A minimal pack:
 
@@ -106,6 +106,36 @@ Loading the same version again changes nothing. A version older than the one alr
 
 A pack is data only. Its text is shown as plain text. Packs never contain deposits or settings.
 
+## Backups
+
+Backups live on the Data screen, which opens from the settings icon on the Start screen.
+
+Export saves everything stored in the app to one file named `moto-plan-YYYY-MM-DD.json`, with the local date. The file holds every record, deleted ones included, so deletions carry over when you import it on another device.
+
+```json
+{
+  "app": "moto-plan",
+  "type": "backup",
+  "schemaVersion": 1,
+  "exportedAt": "2027-01-14T18:20:00.000Z",
+  "data": {
+    "stages": [], "steps": [], "categories": [], "questions": [],
+    "goals": [], "costs": [], "deposits": [], "settings": []
+  }
+}
+```
+
+There is one import button for backups and content packs. The app tells them apart by `type`. Before saving a backup, it shows how many entries are new, newer than in the app and unchanged, and lets you choose:
+
+- **Merge** (*Połącz*) adds entries the app does not have. An entry already in the app is replaced only when the one in the file has a later `updatedAt`. On equal dates the entry in the app stays.
+- **Replace all** (*Zastąp wszystko*) clears the app and loads the file as it is. It asks for confirmation first.
+
+A backup from a newer version of the app is rejected, and so is a damaged one. Every record needs a non-empty `id`, `deleted` set to `true` or `false`, and `createdAt` and `updatedAt` written exactly as JavaScript's `toISOString()` writes them, for example `2027-01-14T18:20:00.000Z`. Nothing is saved from a rejected file.
+
+The Data screen shows when you last exported a backup. When there has never been one, or the last one is more than 7 days old, and the app has changes made after it, a dot appears next to that line and on the settings icon on the Start screen.
+
+**Delete all data** (*Usuń wszystkie dane*) at the bottom of the Data screen removes the database and the stored theme from this browser after two confirmations. It cannot be undone, so export a backup first if you want to keep anything.
+
 ## Privacy
 
 This repository contains code and a generic example only. Personal backups and private content packs are ignored by git (`moto-plan-*.json`, `prywatne/`). Do not commit them.
@@ -130,6 +160,7 @@ tests/                  browser test page
 - `master` always works. Each change is made on a short-lived branch and merged when its checks pass.
 - Commits are small and do one thing. Messages are one short line in the imperative: `Add hash router`, `Fix step counter after delete`.
 - Tests for the pure functions run in the browser at `http://localhost:8000/tests/`.
+- The version number is in `js/version.js` and is shown at the bottom of the Data screen.
 
 ## License
 
