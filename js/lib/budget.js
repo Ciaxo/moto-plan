@@ -1,4 +1,5 @@
 import { addMonths } from './dates.js';
+import { ordered } from './order.js';
 
 const defaults = { goalMode: 'single', monthlyDeposit: 0 };
 
@@ -34,6 +35,36 @@ export function forecast({ total, missing }, monthlyDeposit, today) {
   }
   const months = Math.ceil(missing / monthlyDeposit);
   return { months, month: addMonths(today.slice(0, 7), months) };
+}
+
+export function goalFunding(goals, costs, deposits) {
+  const liveCosts = ordered(costs);
+  const liveDeposits = deposits.filter((deposit) => !deposit.deleted);
+  const list = ordered(goals);
+  let pool = sum(liveDeposits.filter((deposit) => deposit.goalId === null));
+  const result = [];
+  for (const [index, goal] of list.entries()) {
+    const goalCosts = liveCosts.filter((cost) => cost.goalId === goal.id);
+    const value = sum(goalCosts);
+    const manual = sum(liveDeposits.filter((deposit) => deposit.goalId === goal.id));
+    const taken = index === list.length - 1 ? pool : Math.min(pool, Math.max(0, value - manual));
+    pool -= taken;
+    const funded = manual + taken;
+    result.push({
+      goal,
+      costs: goalCosts,
+      value,
+      funded,
+      spent: sum(goalCosts.filter((cost) => cost.status === 'paid')),
+      percent: percentOf(funded, value),
+      covered: value > 0 && funded >= value,
+    });
+  }
+  return result;
+}
+
+export function currentGoal(funding) {
+  return funding.find((entry) => entry.value > 0 && !entry.covered);
 }
 
 function sum(records) {

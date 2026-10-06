@@ -1,5 +1,7 @@
 import { backupAge, mergeBackup, needsBackup, validateBackup } from '../js/lib/backup.js';
-import { budgetSettings, budgetTotals, forecast } from '../js/lib/budget.js';
+import {
+  budgetSettings, budgetTotals, currentGoal, forecast, goalFunding,
+} from '../js/lib/budget.js';
 import { addMonths, daysBetween, formatDate, formatMonth, localDate } from '../js/lib/dates.js';
 import { formatAmount, plural } from '../js/lib/format.js';
 import { nextOrder } from '../js/lib/order.js';
@@ -814,6 +816,108 @@ test('prognoza: bez kosztów i po osiągnięciu celu, także bez miesięcznej wp
     [forecast(budgetTotals([], []), 1500, today), forecast(reached, 0, today)],
     [{ message: 'Dodaj koszty' }, { message: 'Cel osiągnięty' }],
   );
+});
+
+function goal(id, order, fields = {}) {
+  return { id, order, title: id, createdAt, deleted: false, ...fields };
+}
+
+const exampleGoals = [goal('ex-goal-1', 1), goal('ex-goal-2', 2)];
+
+function funding(goals, costs, deposits) {
+  return goalFunding(goals, costs, deposits).map((entry) => {
+    const { value, funded, percent, covered } = entry;
+    return { id: entry.goal.id, value, funded, percent, covered };
+  });
+}
+
+test('cele: przykład z paczki, wpłata automatyczna pokrywa cel 1, reszta idzie do celu 2', () => {
+  assertEqual(funding(exampleGoals, exampleCosts, [autoDeposit]), [
+    { id: 'ex-goal-1', value: 8100, funded: 8100, percent: 100, covered: true },
+    { id: 'ex-goal-2', value: 21900, funded: 3900, percent: 17, covered: false },
+  ]);
+});
+
+test('cele: wpłata ręczna do celu 2 podnosi tylko cel 2', () => {
+  const deposits = [autoDeposit, deposit('d-goal', 2000, { goalId: 'ex-goal-2' })];
+  assertEqual(
+    funding(exampleGoals, exampleCosts, deposits).map(({ funded }) => funded),
+    [8100, 5900],
+  );
+});
+
+test('cele: jedyna wpłata ręcznie do celu 2, cel 1 bez zasilenia', () => {
+  const deposits = [deposit('d-goal', 5000, { goalId: 'ex-goal-2' })];
+  assertEqual(
+    funding(exampleGoals, exampleCosts, deposits).map(({ funded }) => funded),
+    [0, 5000],
+  );
+});
+
+test('cele: ręczna wpłata ponad wartość celu nie przechodzi na inne cele', () => {
+  const deposits = [
+    deposit('d-goal', 10000, { goalId: 'ex-goal-1' }),
+    deposit('d-auto', 1000),
+  ];
+  assertEqual(funding(exampleGoals, exampleCosts, deposits), [
+    { id: 'ex-goal-1', value: 8100, funded: 10000, percent: 100, covered: true },
+    { id: 'ex-goal-2', value: 21900, funded: 1000, percent: 4, covered: false },
+  ]);
+});
+
+test('cele: ostatni cel bierze całą resztę puli, pasek najwyżej 100%', () => {
+  assertEqual(funding(exampleGoals, exampleCosts, [deposit('d', 40000)]), [
+    { id: 'ex-goal-1', value: 8100, funded: 8100, percent: 100, covered: true },
+    { id: 'ex-goal-2', value: 21900, funded: 31900, percent: 100, covered: true },
+  ]);
+});
+
+test('cele: cel bez kosztów nie bierze z puli, chyba że jest ostatni, i nie jest pokryty', () => {
+  const goals = [goal('a', 1), goal('b', 2), goal('c', 3)];
+  const costs = [cost('x', 'a', 1000, 'once'), cost('y', 'c', 2000, 'once')];
+  const lastEmpty = [goal('a', 1), goal('b', 2)];
+  assertEqual(
+    [
+      funding(goals, costs, [deposit('d', 1500)]),
+      funding(lastEmpty, costs.slice(0, 1), [deposit('d', 1500)]),
+    ],
+    [
+      [
+        { id: 'a', value: 1000, funded: 1000, percent: 100, covered: true },
+        { id: 'b', value: 0, funded: 0, percent: 0, covered: false },
+        { id: 'c', value: 2000, funded: 500, percent: 25, covered: false },
+      ],
+      [
+        { id: 'a', value: 1000, funded: 1000, percent: 100, covered: true },
+        { id: 'b', value: 0, funded: 500, percent: 0, covered: false },
+      ],
+    ],
+  );
+});
+
+test('cele: według order, koszty celu według order, wydane, bez usuniętych', () => {
+  const goals = [goal('b', 2), goal('a', 1), goal('gone', 0, { deleted: true })];
+  const costs = [
+    cost('a-2', 'a', 300, 'yearly', { order: 2, status: 'paid' }),
+    cost('a-1', 'a', 200, 'once', { order: 1, status: 'paid' }),
+    cost('a-3', 'a', 900, 'once', { order: 3, deleted: true, status: 'paid' }),
+    cost('b-1', 'b', 400, 'hidden', { order: 4 }),
+  ];
+  const result = goalFunding(goals, costs, [deposit('d', 100)]);
+  assertEqual(
+    result.map((entry) => [entry.goal.id, ids(entry.costs), entry.value, entry.spent]),
+    [['a', ['a-1', 'a-2'], 500, 500], ['b', ['b-1'], 400, 0]],
+  );
+});
+
+test('cele: bieżący to pierwszy niepokryty z kosztami, a gdy wszystkie pokryte, brak', () => {
+  const goals = [goal('a', 1), goal('b', 2), goal('c', 3)];
+  const costs = [cost('x', 'a', 1000, 'once'), cost('y', 'c', 2000, 'once')];
+  const current = (amount) => {
+    const entry = currentGoal(goalFunding(goals, costs, [deposit('d', amount)]));
+    return entry?.goal.id;
+  };
+  assertEqual([current(0), current(1000), current(3000)], ['a', 'c', undefined]);
 });
 
 showResults();
