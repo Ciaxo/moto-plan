@@ -46,7 +46,7 @@ export async function importPack(pack) {
 
 function summary(pack, installed, { changes, counts }) {
   const sameVersion = installed[pack.packId]?.version === pack.version;
-  const otherPack = Object.keys(installed).some((packId) => packId !== pack.packId);
+  const otherPack = !installed[pack.packId] && Object.keys(installed).length > 0;
   const name = element('p');
   name.append(element('strong', null, pack.title));
   const body = document.createDocumentFragment();
