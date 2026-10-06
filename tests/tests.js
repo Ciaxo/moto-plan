@@ -1,4 +1,5 @@
 import { backupAge, mergeBackup, needsBackup, validateBackup } from '../js/lib/backup.js';
+import { budgetSettings, budgetTotals, forecast } from '../js/lib/budget.js';
 import { addMonths, daysBetween, formatDate, formatMonth, localDate } from '../js/lib/dates.js';
 import { formatAmount, plural } from '../js/lib/format.js';
 import { nextOrder } from '../js/lib/order.js';
@@ -686,6 +687,133 @@ test('odpowiedź: tekst zostaje dosłowny, a myślnik bez spacji nie tworzy list
 
 test('odpowiedź: pusta odpowiedź i końce linii z Windows', () => {
   assertEqual([textBlocks(''), textBlocks('A\r\n\r\n- b')], [[], [paragraph('A'), list('b')]]);
+});
+
+function cost(id, goalId, amount, group, fields = {}) {
+  return { id, goalId, amount, group, status: 'planned', createdAt, deleted: false, ...fields };
+}
+
+function deposit(id, amount, fields = {}) {
+  return { id, amount, goalId: null, date: '2026-10-01', createdAt, deleted: false, ...fields };
+}
+
+// Costs of data/example-pack.json, with only the fields the calculations read.
+const exampleCosts = [
+  cost('ex-cost-kurs', 'ex-goal-1', 3500, 'once'),
+  cost('ex-cost-badanie', 'ex-goal-1', 200, 'once'),
+  cost('ex-cost-egzaminy', 'ex-goal-1', 400, 'once'),
+  cost('ex-cost-odziez', 'ex-goal-1', 4000, 'once'),
+  cost('ex-cost-motocykl', 'ex-goal-2', 20000, 'once'),
+  cost('ex-cost-rejestracja', 'ex-goal-2', 120, 'once'),
+  cost('ex-cost-zabezpieczenia', 'ex-goal-2', 800, 'once'),
+  cost('ex-cost-oc', 'ex-goal-2', 600, 'yearly'),
+  cost('ex-cost-rezerwa', 'ex-goal-2', 380, 'hidden'),
+];
+const autoDeposit = deposit('d-auto', 12000);
+
+test('budżet: przykład z paczki z wpłatą 12 000 zł', () => {
+  assertEqual(budgetTotals(exampleCosts, [autoDeposit]), {
+    collected: 12000, spent: 0, total: 30000, onAccount: 12000, missing: 18000, percent: 40,
+  });
+});
+
+test('budżet: do sumy wchodzą koszty każdego rodzaju, także roczne i ukryte', () => {
+  const costs = [
+    cost('a', 'g', 1000, 'once'),
+    cost('b', 'g', 600, 'yearly'),
+    cost('c', 'g', 400, 'hidden'),
+  ];
+  assertEqual(budgetTotals(costs, []).total, 2000);
+});
+
+test('budżet: zebrane to wszystkie wpłaty, także przypisane do celu', () => {
+  const deposits = [autoDeposit, deposit('d-goal', 2000, { goalId: 'ex-goal-2' })];
+  assertEqual(budgetTotals(exampleCosts, deposits).collected, 14000);
+});
+
+test('budżet: zapłacenie kosztu zmienia wydane i na koncie, a zebrane nie', () => {
+  const costs = exampleCosts.map((record) => (record.id === 'ex-cost-kurs'
+    ? { ...record, status: 'paid' }
+    : record));
+  const { collected, spent, onAccount } = budgetTotals(costs, [autoDeposit]);
+  assertEqual([collected, spent, onAccount], [12000, 3500, 8500]);
+});
+
+test('budżet: na koncie ujemne, gdy zapłacono więcej, niż wpłacono', () => {
+  const costs = [cost('a', 'g', 3500, 'once', { status: 'paid' })];
+  assertEqual(budgetTotals(costs, [deposit('d', 1000)]).onAccount, -2500);
+});
+
+test('budżet: postęp w dół, najwyżej 100%, brakuje nie mniej niż 0', () => {
+  const totals = (collected, total) => budgetTotals(
+    [cost('a', 'g', total, 'once')],
+    [deposit('d', collected)],
+  );
+  assertEqual(
+    [[1, 3], [29, 100], [199, 200], [200, 200], [31000, 30000]].map(([collected, total]) => {
+      const { percent, missing } = totals(collected, total);
+      return [percent, missing];
+    }),
+    [[33, 2], [29, 71], [99, 1], [100, 0], [100, 0]],
+  );
+});
+
+test('budżet: bez kosztów suma i postęp są zerowe', () => {
+  assertEqual(budgetTotals([], [autoDeposit]), {
+    collected: 12000, spent: 0, total: 0, onAccount: 12000, missing: 0, percent: 0,
+  });
+});
+
+test('budżet: usunięte koszty i wpłaty się nie liczą', () => {
+  const costs = [...exampleCosts, cost('x', 'ex-goal-1', 5000, 'once', { deleted: true })];
+  const deposits = [autoDeposit, deposit('y', 7000, { deleted: true })];
+  const { collected, total } = budgetTotals(costs, deposits);
+  assertEqual([collected, total], [12000, 30000]);
+});
+
+test('budżet: ustawienia z bazy, a bez rekordów wartości domyślne', () => {
+  const settings = [
+    { id: 'goalMode', value: 'split' },
+    { id: 'monthlyDeposit', value: 1500 },
+  ];
+  assertEqual(
+    [budgetSettings(settings), budgetSettings([])],
+    [{ goalMode: 'split', monthlyDeposit: 1500 }, { goalMode: 'single', monthlyDeposit: 0 }],
+  );
+});
+
+test('prognoza: przykład z paczki, październik 2027 za 12 miesięcy', () => {
+  const totals = budgetTotals(exampleCosts, [autoDeposit]);
+  assertEqual(forecast(totals, 1500, today), { months: 12, month: '2027-10' });
+});
+
+test('prognoza: niepełny miesiąc liczy się jako cały', () => {
+  const totals = budgetTotals(exampleCosts, [autoDeposit]);
+  assertEqual(
+    [1600, 3000, 18000].map((monthlyDeposit) => forecast(totals, monthlyDeposit, today)),
+    [
+      { months: 12, month: '2027-10' },
+      { months: 6, month: '2027-04' },
+      { months: 1, month: '2026-11' },
+    ],
+  );
+});
+
+test('prognoza: bez miesięcznej wpłaty, przy 0 i bez rekordu w bazie', () => {
+  const totals = budgetTotals(exampleCosts, [autoDeposit]);
+  const missing = budgetSettings([]).monthlyDeposit;
+  assertEqual(
+    [forecast(totals, 0, today), forecast(totals, missing, today)],
+    [{ message: 'Ustaw miesięczną wpłatę' }, { message: 'Ustaw miesięczną wpłatę' }],
+  );
+});
+
+test('prognoza: bez kosztów i po osiągnięciu celu, także bez miesięcznej wpłaty', () => {
+  const reached = budgetTotals(exampleCosts, [deposit('d', 30000)]);
+  assertEqual(
+    [forecast(budgetTotals([], []), 1500, today), forecast(reached, 0, today)],
+    [{ message: 'Dodaj koszty' }, { message: 'Cel osiągnięty' }],
+  );
 });
 
 showResults();
