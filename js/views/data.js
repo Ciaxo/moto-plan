@@ -1,5 +1,6 @@
+import { exportBackup } from '../backup.js';
 import { nouns, plural } from '../lib/format.js';
-import { element, screenHeader, backLink, icon } from '../ui/elements.js';
+import { button, element, screenHeader, backLink, icon } from '../ui/elements.js';
 import { getTheme, setTheme } from '../theme.js';
 
 const themes = [
@@ -13,11 +14,21 @@ export function renderData(data) {
   screen.append(
     backLink('#/start', 'Start'),
     screenHeader('Dane i ustawienia'),
+    backupCard(),
     themeCard(),
     privacyCard(),
     footer(data),
   );
   return screen;
+}
+
+function backupCard() {
+  const exportButton = button('Eksportuj do pliku', 'button button-primary', exportBackup);
+  exportButton.prepend(icon('download'));
+  exportButton.dataset.id = 'export';
+  const card = element('section', 'card');
+  card.append(element('h2', 'card-title', 'Kopia zapasowa'), exportButton);
+  return card;
 }
 
 function themeCard() {
