@@ -1,12 +1,16 @@
 import { exportBackup, importFile } from '../backup.js';
+import { deleteDatabase } from '../db.js';
 import { backupAge, needsBackup } from '../lib/backup.js';
 import { formatDate, localDate } from '../lib/dates.js';
 import { nouns, plural } from '../lib/format.js';
 import { installedPacks } from '../lib/pack.js';
 import { button, dot, element, screenHeader, backLink, icon } from '../ui/elements.js';
-import { setTheme } from '../theme.js';
+import { openConfirm } from '../ui/sheet.js';
+import { forgetTheme, setTheme } from '../theme.js';
 
 const days = ['dzień', 'dni', 'dni'];
+const deleteText = 'Plan, pytania, budżet i ustawienia znikną z tego urządzenia. '
+  + 'Jeśli chcesz je zachować, najpierw wyeksportuj kopię.';
 
 const themes = [
   ['light', 'Jasny'],
@@ -25,6 +29,7 @@ export function renderData(data) {
     themeCard(data),
     privacyCard(),
     footer(data),
+    deleteButton(),
   );
   return screen;
 }
@@ -132,4 +137,22 @@ function footer(data) {
   });
   const text = [`Moto Plan ${self.APP_VERSION}`, ...counts].join(' · ');
   return element('footer', 'screen-footer', text);
+}
+
+function deleteButton() {
+  const node = button('Usuń wszystkie dane', 'button button-secondary delete-all', () => {
+    openConfirm('Usunąć wszystkie dane?', deleteText, 'Usuń wszystkie dane', () => {
+      openConfirm('Na pewno?', 'Tego nie da się cofnąć.', 'Usuń na zawsze', deleteAll);
+    });
+  });
+  node.dataset.id = 'delete-all';
+  return node;
+}
+
+// A reload opens a fresh empty database and starts the theme from scratch.
+async function deleteAll() {
+  await deleteDatabase();
+  forgetTheme();
+  history.replaceState(null, '', '#/start');
+  location.reload();
 }

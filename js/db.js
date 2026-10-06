@@ -1,3 +1,4 @@
+const NAME = 'moto-plan';
 const STORES = [
   'stages', 'steps', 'categories', 'questions', 'goals', 'costs', 'deposits', 'settings',
 ];
@@ -5,13 +6,23 @@ const STORES = [
 let db;
 
 export async function openDatabase() {
-  const opening = indexedDB.open('moto-plan', 1);
+  const opening = indexedDB.open(NAME, 1);
   opening.onupgradeneeded = () => {
     for (const store of STORES) {
       opening.result.createObjectStore(store, { keyPath: 'id' });
     }
   };
   db = await requestDone(opening);
+  // Another tab cannot delete or upgrade the database while this connection stays open.
+  db.onversionchange = () => {
+    db.close();
+    location.reload();
+  };
+}
+
+export async function deleteDatabase() {
+  db.close();
+  await requestDone(indexedDB.deleteDatabase(NAME));
 }
 
 export function getAll(store) {

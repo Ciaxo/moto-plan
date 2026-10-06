@@ -12,6 +12,10 @@ export async function setTheme(theme) {
   localStorage.setItem(KEY, theme);
 }
 
+export function forgetTheme() {
+  localStorage.removeItem(KEY);
+}
+
 export async function startTheme() {
   await loadTheme();
   darkScheme.addEventListener('change', applyTheme);

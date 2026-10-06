@@ -215,3 +215,7 @@
   font-size: var(--fs-14);
   text-align: center;
 }
+
+.delete-all {
+  margin-top: var(--sp-6);
+}
