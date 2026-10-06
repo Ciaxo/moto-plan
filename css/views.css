@@ -554,3 +554,24 @@
   font-size: var(--fs-14);
   text-align: center;
 }
+
+.savings {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.savings-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  column-gap: var(--sp-3);
+}
+
+.savings-title {
+  font-weight: var(--fw-bold);
+}
+
+.savings-meta {
+  color: var(--ink-2);
+}

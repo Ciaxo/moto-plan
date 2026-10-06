@@ -1,12 +1,15 @@
 import { importFile } from '../backup.js';
 import { loadExample } from '../content.js';
 import { needsBackup } from '../lib/backup.js';
+import { budgetSettings, budgetTotals, forecast } from '../lib/budget.js';
 import { formatMonth, localDate } from '../lib/dates.js';
-import { plural, pluralForm } from '../lib/format.js';
+import { formatAmount, plural, pluralForm } from '../lib/format.js';
 import {
   countDone, currentStage, isClosed, nextSteps, planStages, progress,
 } from '../lib/plan.js';
-import { SVG_NS, button, dot, element, screenHeader, icon } from '../ui/elements.js';
+import {
+  SVG_NS, button, dot, element, screenHeader, icon, percentBar,
+} from '../ui/elements.js';
 import { clickedStep, stepRow, stepsGenitive, toggleStep } from './plan.js';
 import { openStepSheet } from './step-sheet.js';
 
@@ -30,6 +33,11 @@ export function renderStart(data) {
     screen.append(progressCard(plan, steps, current));
   }
   screen.append(...nextStepsSection(plan, steps, today));
+  const totals = budgetTotals(data.costs, data.deposits);
+  if (totals.total > 0) {
+    const { monthlyDeposit } = budgetSettings(data.settings);
+    screen.append(savingsCard(totals, forecast(totals, monthlyDeposit, today)));
+  }
   return screen;
 }
 
@@ -162,6 +170,30 @@ function nextStepsCard(plan, steps, today, allSteps) {
     }
   });
   return list;
+}
+
+function savingsCard(totals, purchase) {
+  const card = element('a', 'card savings');
+  card.href = '#/budzet';
+  const collected = `${formatAmount(totals.collected)} z ${formatAmount(totals.total)}`;
+  card.append(
+    savingsRow(
+      element('span', 'savings-title', 'Zebrane'),
+      element('span', 'savings-meta', collected),
+    ),
+    percentBar(totals.percent, 'Zebrane'),
+    savingsRow(
+      element('span', 'savings-meta', 'Zakup około'),
+      element('span', 'savings-title', purchase.message ?? formatMonth(purchase.month)),
+    ),
+  );
+  return card;
+}
+
+function savingsRow(...parts) {
+  const row = element('div', 'savings-row');
+  row.append(...parts);
+  return row;
 }
 
 function textCard(text, ...extra) {
