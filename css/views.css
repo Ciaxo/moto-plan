@@ -290,6 +290,7 @@
 
 .budget-amount,
 .figure dd,
+.monthly-value,
 .group-sum,
 .cost-amount {
   font-variant-numeric: tabular-nums;
@@ -314,6 +315,28 @@
 .figure dd {
   margin: 0;
   font-weight: var(--fw-bold);
+}
+
+.monthly {
+  flex-direction: row;
+  align-items: center;
+  min-height: var(--row-min);
+  border: none;
+  color: var(--ink);
+  text-align: start;
+}
+
+.monthly-label {
+  flex: 1;
+  color: var(--ink-2);
+}
+
+.monthly-value {
+  font-weight: var(--fw-bold);
+}
+
+.monthly > .icon {
+  color: var(--ink-2);
 }
 
 .group-title {

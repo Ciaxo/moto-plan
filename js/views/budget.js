@@ -3,8 +3,9 @@ import { budgetSettings, budgetTotals, forecast } from '../lib/budget.js';
 import { formatDate, formatMonth, localDate } from '../lib/dates.js';
 import { formatAmount } from '../lib/format.js';
 import { ordered } from '../lib/order.js';
-import { addButton, checkbox, element, icon, screenHeader } from '../ui/elements.js';
+import { addButton, button, checkbox, element, icon, screenHeader } from '../ui/elements.js';
 import { openCostSheet } from './cost-sheet.js';
+import { openMonthlySheet } from './deposit-sheet.js';
 
 const groups = [
   ['once', 'Jednorazowe'],
@@ -27,6 +28,7 @@ export function renderBudget(data, entered) {
   screen.append(
     screenHeader('Budżet', { eyebrow: forecastText(forecast(totals, monthlyDeposit, today)) }),
     summaryCard(totals),
+    monthlyCard(monthlyDeposit),
   );
   for (const [group, title] of groups) {
     const inGroup = costs.filter((cost) => cost.group === group);
@@ -65,6 +67,17 @@ function summaryCard(totals) {
     ]),
   );
   return card;
+}
+
+function monthlyCard(monthlyDeposit) {
+  const node = button(null, 'card monthly', () => openMonthlySheet(monthlyDeposit));
+  node.dataset.id = 'monthly';
+  node.append(
+    element('span', 'monthly-label', 'Wpłata co miesiąc'),
+    element('span', 'monthly-value', monthlyDeposit > 0 ? formatAmount(monthlyDeposit) : 'Ustaw'),
+    icon('chevron-right'),
+  );
+  return node;
 }
 
 function figures(entries) {
