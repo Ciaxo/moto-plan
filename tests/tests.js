@@ -7,6 +7,7 @@ import {
   currentStage, isClosed, nextSteps, planStages, progress,
 } from '../js/lib/plan.js';
 import { matches } from '../js/lib/search.js';
+import { textBlocks } from '../js/lib/text.js';
 import { element, screenHeader } from '../js/ui/elements.js';
 
 const results = [];
@@ -635,6 +636,35 @@ test('wyszukiwanie: słowo nie łączy końca jednego pola z początkiem następ
 test('wyszukiwanie: pusta fraza i same spacje pasują do każdego pytania', () => {
   const record = question({ question: 'Co zrobić po kolizji?' });
   assertEqual([matches(record, ''), matches(record, '   ')], [true, true]);
+});
+
+const paragraph = (text) => ({ type: 'paragraph', text });
+const list = (...items) => ({ type: 'list', items });
+
+test('odpowiedź: akapity rozdziela pusta linia, także z samymi spacjami', () => {
+  assertEqual(textBlocks('Pierwszy.\n\nDrugi.\n   \nTrzeci.'), [
+    paragraph('Pierwszy.'), paragraph('Drugi.'), paragraph('Trzeci.'),
+  ]);
+});
+
+test('odpowiedź: pojedyncza nowa linia zostaje w tym samym akapicie', () => {
+  assertEqual(textBlocks('Linia pierwsza\nLinia druga'), [
+    paragraph('Linia pierwsza\nLinia druga'),
+  ]);
+});
+
+test('odpowiedź: lista zaraz po akapicie, a pusta linia ją kończy', () => {
+  assertEqual(textBlocks('Przed zakupem sprawdź:\n- zakres\n- udział własny\n\nPotem kup.'), [
+    paragraph('Przed zakupem sprawdź:'), list('zakres', 'udział własny'), paragraph('Potem kup.'),
+  ]);
+});
+
+test('odpowiedź: tekst zostaje dosłowny, a myślnik bez spacji nie tworzy listy', () => {
+  assertEqual(textBlocks('<b>test</b>\n-bez spacji'), [paragraph('<b>test</b>\n-bez spacji')]);
+});
+
+test('odpowiedź: pusta odpowiedź i końce linii z Windows', () => {
+  assertEqual([textBlocks(''), textBlocks('A\r\n\r\n- b')], [[], [paragraph('A'), list('b')]]);
 });
 
 showResults();
