@@ -1,4 +1,4 @@
-import { openDatabase } from './db.js';
+import { loadAll, openDatabase } from './db.js';
 import { startRouter } from './router.js';
 import { startTheme } from './theme.js';
 import { element } from './ui/elements.js';
@@ -25,6 +25,8 @@ const databaseError = 'Nie da się otworzyć bazy danych. Przeglądarka nie pozw
 
 const main = document.querySelector('main');
 const tabs = document.querySelectorAll('nav a');
+let data;
+let currentScreen;
 
 function markTab(name) {
   for (const tab of tabs) {
@@ -36,6 +38,22 @@ function markTab(name) {
   }
 }
 
+function show(name) {
+  currentScreen = name;
+  main.replaceChildren(screens[name](data));
+  markTab(name);
+}
+
+async function redraw() {
+  data = await loadAll();
+  const active = main.contains(document.activeElement) ? document.activeElement : null;
+  const focusedId = active?.closest('[data-id]')?.dataset.id;
+  show(currentScreen);
+  if (focusedId) {
+    main.querySelector(`[data-id="${CSS.escape(focusedId)}"]`)?.focus();
+  }
+}
+
 async function start() {
   try {
     await openDatabase();
@@ -44,10 +62,9 @@ async function start() {
     return;
   }
   await startTheme();
-  startRouter(Object.keys(screens), (name) => {
-    main.replaceChildren(screens[name]());
-    markTab(name);
-  });
+  data = await loadAll();
+  window.addEventListener('datachange', redraw);
+  startRouter(Object.keys(screens), show);
 }
 
 start();

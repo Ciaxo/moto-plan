@@ -24,6 +24,7 @@ function themeCard() {
     input.name = 'theme';
     input.value = value;
     input.checked = value === current;
+    input.dataset.id = `theme-${value}`;
     const option = element('label', 'segment');
     option.append(input, label);
     options.append(option);
