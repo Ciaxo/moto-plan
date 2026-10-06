@@ -30,6 +30,12 @@ export function screenHeader(title, { eyebrow, action } = {}) {
   return header;
 }
 
+export function field(label, control) {
+  const node = element('label', 'field');
+  node.append(element('span', 'field-label', label), control);
+  return node;
+}
+
 export function icon(name) {
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('class', 'icon');

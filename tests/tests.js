@@ -1,7 +1,9 @@
 import { formatDate, localDate } from '../js/lib/dates.js';
 import { formatAmount, plural } from '../js/lib/format.js';
-import { mergePack, validatePack } from '../js/lib/pack.js';
-import { currentStage, isClosed, nextSteps, planStages, progress } from '../js/lib/plan.js';
+import { editRecord, mergePack, validatePack } from '../js/lib/pack.js';
+import {
+  currentStage, isClosed, nextOrder, nextSteps, planStages, progress,
+} from '../js/lib/plan.js';
 import { element, screenHeader } from '../js/ui/elements.js';
 
 const results = [];
@@ -160,6 +162,10 @@ test('plan: bieżący etap to pierwszy niezamknięty, a gdy wszystkie są zamkni
     ],
     ['a', 'b', 'c', 'c'],
   );
+});
+
+test('plan: nowy etap albo krok trafia na koniec', () => {
+  assertEqual([nextOrder([]), nextOrder([stage('a', 2), stage('b', 5)])], [1, 6]);
 });
 
 test('plan: najbliższe kroki według końca terminu, potem etapu i kroku', () => {
@@ -366,6 +372,28 @@ test('łączenie: pomija nowy krok usuniętego etapu', () => {
     changes.map((change) => change.store),
     ['categories', 'questions', 'goals', 'costs'],
   );
+});
+
+test('edycja: zmiana treści kroku z paczki ustawia userModified, zmiana notatki nie', () => {
+  const packStep = imported(smallPack()).steps[0];
+  assertEqual(
+    [
+      editRecord('steps', packStep, { title: 'Egzamin teoretyczny' }).userModified,
+      editRecord('steps', packStep, { note: 'Zabrać dowód' }).userModified,
+    ],
+    [true, false],
+  );
+});
+
+test('edycja: zapis bez zmian nie daje nic do zapisania', () => {
+  const packStep = imported(smallPack()).steps[0];
+  const { stageId, title, dueDate, cost, note } = packStep;
+  assertEqual(editRecord('steps', packStep, { stageId, title, dueDate, cost, note }), null);
+});
+
+test('edycja: własny krok nie dostaje userModified', () => {
+  const own = { ...step('k9', 's1', 1), title: 'Mój krok', origin: 'user', userModified: false };
+  assertEqual(editRecord('steps', own, { title: 'Mój nowy krok' }).userModified, false);
 });
 
 showResults();

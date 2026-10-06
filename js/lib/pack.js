@@ -226,3 +226,13 @@ function mergeExisting(collection, content, current) {
   }
   return { outcome: 'updated', record: { ...current, ...content } };
 }
+
+export function editRecord(collection, record, changes) {
+  const edited = { ...record, ...changes };
+  const changed = (field) => record[field] !== edited[field];
+  if (!Object.keys(changes).some(changed)) {
+    return null;
+  }
+  const contentChanged = record.origin === 'pack' && COLLECTIONS[collection].fields.some(changed);
+  return { ...edited, userModified: record.userModified || contentChanged };
+}

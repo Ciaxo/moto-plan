@@ -2,7 +2,8 @@ import { save } from '../db.js';
 import { formatDate, localDate } from '../lib/dates.js';
 import { formatAmount, plural } from '../lib/format.js';
 import { countDone, currentStage, isClosed, planStages } from '../lib/plan.js';
-import { element, icon, screenHeader } from '../ui/elements.js';
+import { button, element, icon, screenHeader } from '../ui/elements.js';
+import { openStepSheet } from './step-sheet.js';
 
 const stepsGenitive = ['kroku', 'kroków', 'kroków'];
 const expanded = new Set();
@@ -12,13 +13,14 @@ export function renderPlan(data, entered) {
   const plan = planStages(data.stages, data.steps);
   const current = currentStage(plan);
   expandCurrent(current, entered);
-  const today = localDate(new Date());
+  const context = { plan, today: localDate(new Date()) };
   const steps = plan.flatMap((entry) => entry.steps);
   const timeline = element('ol', 'timeline');
   plan.forEach((entry, index) => {
-    timeline.append(stageItem(entry, index + 1, entry === current, today));
+    timeline.append(stageItem(entry, index + 1, entry === current, context));
   });
   timeline.addEventListener('change', (event) => toggleStep(steps, event.target));
+  timeline.addEventListener('click', (event) => editStep(plan, steps, event.target));
   const eyebrow = `${countDone(steps)} z ${plural(steps.length, stepsGenitive)}`;
   const screen = document.createDocumentFragment();
   screen.append(screenHeader('Plan', { eyebrow }), timeline);
@@ -42,7 +44,15 @@ function toggleStep(steps, checkbox) {
   save('steps', { ...step, done, doneAt: done ? new Date().toISOString() : null });
 }
 
-function stageItem({ stage, steps }, number, isCurrent, today) {
+function editStep(plan, steps, target) {
+  const row = target.closest('.row-main');
+  if (row) {
+    openStepSheet(plan, { step: steps.find((step) => step.id === row.value) });
+  }
+}
+
+function stageItem(entry, number, isCurrent, context) {
+  const { stage, steps } = entry;
   const card = element('details', 'card stage-card');
   card.open = expanded.has(stage.id);
   card.addEventListener('toggle', () => {
@@ -52,7 +62,7 @@ function stageItem({ stage, steps }, number, isCurrent, today) {
       expanded.delete(stage.id);
     }
   });
-  card.append(stageSummary(stage, steps, number), stageBody(stage, steps, today));
+  card.append(stageSummary(stage, steps, number), stageBody(entry, context));
   const item = element('li', 'stage');
   if (isCurrent) {
     item.setAttribute('aria-current', 'step');
@@ -83,7 +93,7 @@ function stageSummary(stage, steps, number) {
   return summary;
 }
 
-function stageBody(stage, steps, today) {
+function stageBody({ stage, steps }, { plan, today }) {
   const progress = element('progress', 'progress progress-sm');
   // A max of 0 is ignored, so a stage without steps shows an empty bar.
   progress.max = steps.length;
@@ -91,8 +101,13 @@ function stageBody(stage, steps, today) {
   progress.setAttribute('aria-label', `Postęp etapu ${stage.title}`);
   const list = element('ul', 'list');
   list.append(...steps.map((step) => stepRow(step, today)));
+  const add = button('Dodaj krok', 'button button-add', () => {
+    openStepSheet(plan, { stageId: stage.id });
+  });
+  add.prepend(icon('plus'));
+  add.dataset.id = `add-step-${stage.id}`;
   const body = element('div', 'stage-body');
-  body.append(progress, list);
+  body.append(progress, list, add);
   return body;
 }
 
@@ -109,6 +124,7 @@ function stepRow(step, today) {
   check.append(checkbox, mark);
   const main = element('button', 'row-main');
   main.type = 'button';
+  main.value = step.id;
   main.dataset.id = `step-${step.id}`;
   main.append(element('span', 'row-title', step.title));
   const meta = stepMeta(step, today);

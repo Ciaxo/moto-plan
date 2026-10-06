@@ -26,6 +26,10 @@ export function progress(steps) {
   return Math.floor((countDone(steps) * 100) / steps.length);
 }
 
+export function nextOrder(records) {
+  return Math.max(0, ...records.map((record) => record.order)) + 1;
+}
+
 export function nextSteps(plan) {
   // The sort is stable, so steps with the same due end keep plan order: stage, then step.
   return plan
