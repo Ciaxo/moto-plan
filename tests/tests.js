@@ -1,6 +1,6 @@
 import { backupAge, mergeBackup, needsBackup, validateBackup } from '../js/lib/backup.js';
 import {
-  budgetSettings, budgetTotals, currentGoal, forecast, goalFunding,
+  budgetSettings, budgetTotals, currentGoal, depositsByDate, forecast, goalFunding,
 } from '../js/lib/budget.js';
 import { addMonths, daysBetween, formatDate, formatMonth, localDate } from '../js/lib/dates.js';
 import { formatAmount, plural } from '../js/lib/format.js';
@@ -918,6 +918,17 @@ test('cele: bieżący to pierwszy niepokryty z kosztami, a gdy wszystkie pokryte
     return entry?.goal.id;
   };
   assertEqual([current(0), current(1000), current(3000)], ['a', 'c', undefined]);
+});
+
+test('wpłaty: od najnowszej, przy tej samej dacie później dodana wyżej, bez usuniętych', () => {
+  const deposits = [
+    deposit('a', 100, { date: '2026-09-15' }),
+    deposit('b', 100, { date: '2026-10-01', createdAt: '2026-10-01T08:00:00.000Z' }),
+    deposit('c', 100, { date: '2026-10-01', createdAt: '2026-10-02T08:00:00.000Z' }),
+    deposit('d', 100, { date: '2026-10-03', deleted: true }),
+    deposit('e', 100, { date: '2025-12-31' }),
+  ];
+  assertEqual(ids(depositsByDate(deposits)), ['c', 'b', 'a', 'e']);
 });
 
 showResults();

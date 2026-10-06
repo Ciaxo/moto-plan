@@ -292,7 +292,8 @@
 .figure dd,
 .monthly-value,
 .group-sum,
-.cost-amount {
+.cost-amount,
+.deposit-amount {
   font-variant-numeric: tabular-nums;
 }
 
@@ -346,21 +347,29 @@
   overflow-wrap: anywhere;
 }
 
+.group-heading {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
 .group-sum {
   color: var(--ink-2);
   font-weight: var(--fw-semibold);
 }
 
-.cost-list {
+.fold > .list {
   border-top: var(--hairline) solid var(--line-soft);
 }
 
-.cost-main {
+.cost-main,
+.deposit-main {
   grid-template-columns: 1fr auto;
   column-gap: var(--sp-3);
 }
 
-.cost-amount {
+.cost-amount,
+.deposit-amount {
   grid-row: 1 / span 2;
   grid-column: 2;
   align-self: center;

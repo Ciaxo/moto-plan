@@ -67,6 +67,12 @@ export function currentGoal(funding) {
   return funding.find((entry) => entry.value > 0 && !entry.covered);
 }
 
+export function depositsByDate(deposits) {
+  return deposits
+    .filter((deposit) => !deposit.deleted)
+    .sort((a, b) => b.date.localeCompare(a.date) || b.createdAt.localeCompare(a.createdAt));
+}
+
 function sum(records) {
   return records.reduce((total, record) => total + record.amount, 0);
 }

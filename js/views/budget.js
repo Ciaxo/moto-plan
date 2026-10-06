@@ -1,17 +1,18 @@
 import { save } from '../db.js';
-import { budgetSettings, budgetTotals, forecast } from '../lib/budget.js';
+import { budgetSettings, budgetTotals, depositsByDate, forecast } from '../lib/budget.js';
 import { formatDate, formatMonth, localDate } from '../lib/dates.js';
-import { formatAmount } from '../lib/format.js';
+import { formatAmount, plural } from '../lib/format.js';
 import { ordered } from '../lib/order.js';
 import { addButton, button, checkbox, element, icon, screenHeader } from '../ui/elements.js';
 import { openCostSheet } from './cost-sheet.js';
-import { openMonthlySheet } from './deposit-sheet.js';
+import { openDepositSheet, openMonthlySheet } from './deposit-sheet.js';
 
 const groups = [
   ['once', 'Jednorazowe'],
   ['yearly', 'Roczne'],
   ['hidden', 'Ukryte i rezerwa'],
 ];
+const depositForms = ['wpłata', 'wpłaty', 'wpłat'];
 const expanded = new Set();
 
 export function renderBudget(data, entered) {
@@ -23,25 +24,41 @@ export function renderBudget(data, entered) {
   const { monthlyDeposit } = budgetSettings(data.settings);
   const totals = budgetTotals(data.costs, data.deposits);
   const costs = ordered(data.costs);
+  const deposits = depositsByDate(data.deposits);
   const context = { data, today };
+  const addDeposit = () => openDepositSheet();
+  const eyebrow = forecastText(forecast(totals, monthlyDeposit, today));
   const screen = document.createDocumentFragment();
-  screen.append(
-    screenHeader('Budżet', { eyebrow: forecastText(forecast(totals, monthlyDeposit, today)) }),
-    summaryCard(totals),
-    monthlyCard(monthlyDeposit),
-  );
-  for (const [group, title] of groups) {
-    const inGroup = costs.filter((cost) => cost.group === group);
-    if (inGroup.length > 0) {
-      screen.append(costGroup(`costs-${group}`, title, inGroup, context));
-    }
+  screen.append(screenHeader('Budżet', { eyebrow }));
+  if (deposits.length === 0) {
+    screen.append(starterCard(addDeposit));
   }
-  screen.append(addButton('Dodaj koszt', 'add-cost', () => openCostSheet(data)));
+  screen.append(summaryCard(totals), monthlyCard(monthlyDeposit));
+  if (deposits.length > 0) {
+    screen.append(
+      depositGroup(deposits, today),
+      addButton('Dodaj wpłatę', 'add-deposit', addDeposit),
+    );
+  }
+  screen.append(
+    ...costGroups(costs, context),
+    addButton('Dodaj koszt', 'add-cost', () => openCostSheet(data)),
+  );
   return screen;
 }
 
 function forecastText(result) {
   return result.message ?? `Zakup około: ${formatMonth(result.month)}`;
+}
+
+// Same data-id as "Dodaj wpłatę", which takes the focus when this card disappears.
+function starterCard(addDeposit) {
+  const card = element('section', 'card');
+  card.append(
+    element('p', null, 'Zacznij od tego, co już masz odłożone'),
+    addButton('Dodaj pierwszą wpłatę', 'add-deposit', addDeposit),
+  );
+  return card;
 }
 
 function summaryCard(totals) {
@@ -90,7 +107,7 @@ function figures(entries) {
   return list;
 }
 
-function costGroup(id, title, costs, context) {
+function foldCard(id, heading, body) {
   const card = element('details', 'card fold');
   card.open = expanded.has(id);
   card.addEventListener('toggle', () => {
@@ -104,18 +121,67 @@ function costGroup(id, title, costs, context) {
   chevron.classList.add('fold-chevron');
   const summary = element('summary', 'fold-summary');
   summary.dataset.id = id;
-  const total = costs.reduce((sum, cost) => sum + cost.amount, 0);
-  summary.append(
-    element('span', 'group-title', title),
-    element('span', 'group-sum', formatAmount(total)),
-    chevron,
-  );
-  card.append(summary, costList(costs, context));
+  summary.append(...heading, chevron);
+  card.append(summary, body);
   return card;
 }
 
+function depositGroup(deposits, today) {
+  const last = formatDate(deposits[0].date, today);
+  const heading = element('span', 'group-heading');
+  heading.append(
+    element('span', 'group-title', 'Wpłaty'),
+    element('span', 'row-meta', `${plural(deposits.length, depositForms)} · ostatnia ${last}`),
+  );
+  const list = element('ul', 'list');
+  list.append(...deposits.map((deposit) => depositRow(deposit, today)));
+  list.addEventListener('click', (event) => editDeposit(deposits, event.target));
+  return foldCard('deposits', [heading], list);
+}
+
+function depositRow(deposit, today) {
+  const main = element('button', 'row-main deposit-main');
+  main.type = 'button';
+  main.value = deposit.id;
+  main.dataset.id = `deposit-${deposit.id}`;
+  main.append(
+    element('span', 'row-title', formatDate(deposit.date, today)),
+    element('span', 'deposit-amount', formatAmount(deposit.amount)),
+  );
+  const row = element('li', 'row');
+  row.append(main);
+  return row;
+}
+
+function editDeposit(deposits, target) {
+  const row = target.closest('.row-main');
+  if (row) {
+    openDepositSheet(deposits.find((deposit) => deposit.id === row.value));
+  }
+}
+
+function costGroups(costs, context) {
+  const cards = [];
+  for (const [group, title] of groups) {
+    const inGroup = costs.filter((cost) => cost.group === group);
+    if (inGroup.length > 0) {
+      cards.push(costGroup(`costs-${group}`, title, inGroup, context));
+    }
+  }
+  return cards;
+}
+
+function costGroup(id, title, costs, context) {
+  const total = costs.reduce((sum, cost) => sum + cost.amount, 0);
+  const heading = [
+    element('span', 'group-title', title),
+    element('span', 'group-sum', formatAmount(total)),
+  ];
+  return foldCard(id, heading, costList(costs, context));
+}
+
 function costList(costs, { data, today }) {
-  const list = element('ul', 'list cost-list');
+  const list = element('ul', 'list');
   list.append(...costs.map((cost) => costRow(cost, today)));
   list.addEventListener('change', (event) => togglePaid(costs, event.target));
   list.addEventListener('click', (event) => editCost(data, costs, event.target));
