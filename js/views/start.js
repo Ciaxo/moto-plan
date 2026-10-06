@@ -1,11 +1,32 @@
 import { importFile } from '../backup.js';
 import { loadExample } from '../content.js';
 import { needsBackup } from '../lib/backup.js';
-import { localDate } from '../lib/dates.js';
+import { formatMonth, localDate } from '../lib/dates.js';
+import { currentStage, planStages } from '../lib/plan.js';
 import { button, dot, element, screenHeader, icon } from '../ui/elements.js';
 
 export function renderStart(data) {
-  const warn = needsBackup(data, localDate(new Date()));
+  const today = localDate(new Date());
+  const plan = planStages(data.stages, data.steps);
+  const screen = document.createDocumentFragment();
+  screen.append(header(plan, today, settingsLink(needsBackup(data, today))));
+  if (isEmpty(data)) {
+    screen.append(welcomeCard());
+  }
+  return screen;
+}
+
+function header(plan, today, action) {
+  const month = formatMonth(today.slice(0, 7));
+  const current = currentStage(plan);
+  if (!current) {
+    return screenHeader('Moto Plan', { eyebrow: month, action });
+  }
+  const eyebrow = `Etap ${plan.indexOf(current) + 1} z ${plan.length} · ${month}`;
+  return screenHeader(current.stage.headline || current.stage.title, { eyebrow, action });
+}
+
+function settingsLink(warn) {
   const settings = element('a', 'icon-button');
   settings.href = '#/dane';
   settings.setAttribute(
@@ -16,12 +37,7 @@ export function renderStart(data) {
   if (warn) {
     settings.append(dot());
   }
-  const screen = document.createDocumentFragment();
-  screen.append(screenHeader('Start', { action: settings }));
-  if (isEmpty(data)) {
-    screen.append(welcomeCard());
-  }
-  return screen;
+  return settings;
 }
 
 function isEmpty(data) {
