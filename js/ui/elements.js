@@ -81,6 +81,16 @@ export function segmented(name, options, value) {
   return group;
 }
 
+export function checkbox(label, value, checked) {
+  const input = Object.assign(element('input'), { type: 'checkbox', value, checked });
+  input.setAttribute('aria-label', label);
+  const mark = icon('check');
+  mark.classList.add('check-mark');
+  const node = element('label', 'check');
+  node.append(input, mark);
+  return node;
+}
+
 export function dueField(dueDate) {
   const savedKind = kindByLength[dueDate.length];
   const kinds = segmented('due-kind', dueKinds, savedKind);

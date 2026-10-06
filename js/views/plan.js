@@ -2,7 +2,7 @@ import { save } from '../db.js';
 import { formatDate, localDate } from '../lib/dates.js';
 import { formatAmount, plural } from '../lib/format.js';
 import { countDone, currentStage, isClosed, planStages } from '../lib/plan.js';
-import { addButton, button, element, icon, screenHeader } from '../ui/elements.js';
+import { addButton, button, checkbox, element, icon, screenHeader } from '../ui/elements.js';
 import { openStageSheet } from './stage-sheet.js';
 import { openStepSheet } from './step-sheet.js';
 
@@ -126,16 +126,8 @@ function stageBody(entry, { plan, today }) {
 }
 
 function stepRow(step, today) {
-  const checkbox = element('input');
-  checkbox.type = 'checkbox';
-  checkbox.checked = step.done;
-  checkbox.value = step.id;
-  checkbox.dataset.id = `done-${step.id}`;
-  checkbox.setAttribute('aria-label', step.title);
-  const mark = icon('check');
-  mark.classList.add('check-mark');
-  const check = element('label', 'check');
-  check.append(checkbox, mark);
+  const check = checkbox(step.title, step.id, step.done);
+  check.querySelector('input').dataset.id = `done-${step.id}`;
   const main = element('button', 'row-main');
   main.type = 'button';
   main.value = step.id;
