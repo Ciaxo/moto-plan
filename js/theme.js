@@ -23,8 +23,8 @@ export async function startTheme() {
 
 export async function loadTheme() {
   const record = await getOne('settings', 'theme');
+  current = record?.value ?? 'system';
   if (record) {
-    current = record.value;
     localStorage.setItem(KEY, current);
   } else {
     localStorage.removeItem(KEY);
