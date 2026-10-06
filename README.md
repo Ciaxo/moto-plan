@@ -12,7 +12,7 @@ Early development.
 
 - [x] App shell and navigation
 - [x] UI components, light and dark theme
-- [ ] Local database and content packs
+- [x] Local database and content packs
 - [ ] Plan screen
 - [ ] Backup export and import
 - [ ] Knowledge base
@@ -42,7 +42,7 @@ Open `http://localhost:8000`.
 
 ## Content packs
 
-The app starts empty. You load content from a JSON file called a content pack, or add everything by hand.
+The app starts empty. Its content (stages, steps, questions, goals and costs) comes from a JSON file called a content pack. On first start the app offers to load the bundled example pack.
 
 A minimal pack:
 
@@ -69,32 +69,40 @@ See [data/example-pack.json](data/example-pack.json) for a full example.
 
 | Field | Description |
 |---|---|
-| `app`, `type` | Always `moto-plan` and `content`. |
-| `formatVersion` | Format version, currently `1`. |
-| `packId` | Stable id of the pack. Never changes between versions. |
-| `title` | Name shown in the app. |
-| `version` | Integer, raised with every update of the pack. |
+| `app`, `type` | Required. Always `moto-plan` and `content`. |
+| `formatVersion` | Format version, currently `1`. Packs with a higher version are rejected. |
+| `packId` | Required. Stable id of the pack. Never changes between versions. |
+| `title` | Required. Name shown in the app. |
+| `version` | Required. Integer, raised with every update of the pack. |
 
-Every collection below is optional. Each record needs a unique `id`.
+Every collection below is optional, so a pack can hold only questions, for example. Each record needs an `id` that is unique within its collection.
 
-| Collection | Fields |
-|---|---|
-| `stages` | `order`, `title`, `period` (free text), `headline` (optional) |
-| `steps` | `stageId`, `order`, `title`, `dueDate`, `cost` (number or `null`), `hint` |
-| `categories` | `order`, `title` |
-| `questions` | `categoryId`, `order`, `question`, `answer`, `sourceTitle`, `sourceUrl` |
-| `goals` | `order`, `title` |
-| `costs` | `order`, `title`, `amount`, `group`, `goalId`, `date` |
+| Collection | Required fields | Optional fields |
+|---|---|---|
+| `stages` | `title` | `order`, `period`, `headline` |
+| `steps` | `stageId`, `title` | `order`, `dueDate`, `cost`, `hint` |
+| `categories` | `title` | `order` |
+| `questions` | `categoryId`, `question` | `order`, `answer`, `sourceTitle`, `sourceUrl` |
+| `goals` | `title` | `order` |
+| `costs` | `title`, `amount`, `group`, `goalId` | `order`, `date` |
 
+- `title` and `question` are non-empty text. Other text fields default to an empty string.
+- `order` is a number. Without it, records keep their order from the file.
+- Amounts are whole złoty. `amount` is an integer greater than zero. `cost` is an integer greater than zero, or `null`, which is the default.
 - Dates are empty or written as `YYYY`, `YYYY-MM` or `YYYY-MM-DD`.
 - `group` is `once`, `yearly` or `hidden`.
-- `answer` is plain text. A blank line starts a new paragraph. Lines starting with `- ` form a list.
-- `sourceUrl` must start with `https://`.
 - `stageId`, `categoryId` and `goalId` must point to a record in the same pack or one already in the app.
+- `answer` is plain text. A blank line starts a new paragraph. Lines starting with `- ` form a list.
+- `sourceUrl` is shown as a link only when it starts with `https://`. Any other address is kept, but shown without a link.
+- Other fields are ignored, including fields starting with `_` and progress fields such as `done`.
+
+A pack with any of these problems is rejected as a whole. The app lists the problems and saves nothing.
 
 ### Updating a pack
 
-Keep `packId` and record ids stable and raise `version`. Importing a newer version adds new records and updates the ones you have not edited. Your progress, notes, edits and deleted records are left alone.
+Keep `packId` and record ids stable and raise `version`. Before saving, the app shows how many entries are new, updated, unchanged and skipped. Importing a newer version adds new records and updates the ones you have not edited. Your progress, notes, edits and deleted records are left alone, and records missing from the new version are kept.
+
+Loading the same version again changes nothing. A version older than the one already loaded is rejected. A pack with a different `packId` is added next to the content you already have.
 
 A pack is data only. Its text is shown as plain text. Packs never contain deposits or settings.
 
