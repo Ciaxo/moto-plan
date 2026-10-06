@@ -1,4 +1,5 @@
-import { formatDate, localDate } from '../js/lib/dates.js';
+import { backupAge, needsBackup } from '../js/lib/backup.js';
+import { daysBetween, formatDate, localDate } from '../js/lib/dates.js';
 import { formatAmount, plural } from '../js/lib/format.js';
 import { editRecord, mergePack, validatePack } from '../js/lib/pack.js';
 import {
@@ -93,6 +94,18 @@ test('daty: data lokalna, a nie UTC', () => {
   assertEqual(
     [localDate(new Date(2026, 0, 1, 0, 15)), localDate(new Date(2026, 9, 5, 23, 45))],
     ['2026-01-01', '2026-10-05'],
+  );
+});
+
+test('daty: pełne dni między datami, także przez zmianę czasu i rok', () => {
+  assertEqual(
+    [
+      daysBetween('2026-10-05', '2026-10-05'),
+      daysBetween('2026-10-04', '2026-10-05'),
+      daysBetween('2026-10-24', '2026-10-26'),
+      daysBetween('2026-12-31', '2027-01-01'),
+    ],
+    [0, 1, 2, 1],
   );
 });
 
@@ -394,6 +407,61 @@ test('edycja: zapis bez zmian nie daje nic do zapisania', () => {
 test('edycja: własny krok nie dostaje userModified', () => {
   const own = { ...step('k9', 's1', 1), title: 'Mój krok', origin: 'user', userModified: false };
   assertEqual(editRecord('steps', own, { title: 'Mój nowy krok' }).userModified, false);
+});
+
+// Noon UTC falls on the same local date in nearly every time zone.
+function backupData(lastExportAt, changedAt, fields = {}) {
+  const data = emptyData();
+  if (lastExportAt) {
+    data.settings.push({ id: 'lastExportAt', value: lastExportAt, updatedAt: lastExportAt });
+  }
+  if (changedAt) {
+    data.steps.push({ id: 'k1', updatedAt: changedAt, deleted: false, ...fields });
+  }
+  return data;
+}
+
+const eightDaysAgo = '2026-09-27T12:00:00.000Z';
+
+test('kopia: wiek ostatniej kopii w dniach, bez kopii null', () => {
+  assertEqual(
+    [
+      backupAge(emptyData(), today),
+      backupAge(backupData('2026-10-05T12:00:00.000Z'), today),
+      backupAge(backupData('2026-09-25T12:00:00.000Z'), today),
+    ],
+    [null, 0, 10],
+  );
+});
+
+test('kopia: bez kopii przypomina, gdy w bazie jest cokolwiek', () => {
+  assertEqual(
+    [needsBackup(emptyData(), today), needsBackup(backupData(null, eightDaysAgo), today)],
+    [false, true],
+  );
+});
+
+test('kopia: przypomina dopiero po 7 dniach i tylko przy zmianie po kopii', () => {
+  const sevenDaysAgo = '2026-09-28T12:00:00.000Z';
+  const later = '2026-09-30T12:00:00.000Z';
+  assertEqual(
+    [
+      needsBackup(backupData(sevenDaysAgo, later), today),
+      needsBackup(backupData(eightDaysAgo, later), today),
+      needsBackup(backupData(eightDaysAgo, '2026-09-20T12:00:00.000Z'), today),
+      needsBackup(backupData(eightDaysAgo, later, { deleted: true }), today),
+    ],
+    [false, true, false, true],
+  );
+});
+
+test('kopia: wpis z datą równą kopii i sam zapis lastExportAt nie przypominają', () => {
+  const ownRecord = backupData(eightDaysAgo);
+  ownRecord.settings[0].updatedAt = '2026-09-27T12:00:00.005Z';
+  assertEqual(
+    [needsBackup(backupData(eightDaysAgo, eightDaysAgo), today), needsBackup(ownRecord, today)],
+    [false, false],
+  );
 });
 
 showResults();

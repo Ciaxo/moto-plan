@@ -46,6 +46,12 @@ export function icon(name) {
   return svg;
 }
 
+export function dot() {
+  const node = element('span', 'dot');
+  node.setAttribute('aria-hidden', 'true');
+  return node;
+}
+
 export function backLink(href, label) {
   const link = element('a', 'back-link');
   link.href = href;

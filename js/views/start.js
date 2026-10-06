@@ -1,11 +1,20 @@
 import { loadExample } from '../content.js';
-import { button, element, screenHeader, icon } from '../ui/elements.js';
+import { needsBackup } from '../lib/backup.js';
+import { localDate } from '../lib/dates.js';
+import { button, dot, element, screenHeader, icon } from '../ui/elements.js';
 
 export function renderStart(data) {
+  const warn = needsBackup(data, localDate(new Date()));
   const settings = element('a', 'icon-button');
   settings.href = '#/dane';
-  settings.setAttribute('aria-label', 'Dane i ustawienia');
+  settings.setAttribute(
+    'aria-label',
+    warn ? 'Dane i ustawienia, brak aktualnej kopii' : 'Dane i ustawienia',
+  );
   settings.append(icon('settings'));
+  if (warn) {
+    settings.append(dot());
+  }
   const screen = document.createDocumentFragment();
   screen.append(screenHeader('Start', { action: settings }));
   if (isEmpty(data)) {

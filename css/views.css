@@ -171,6 +171,13 @@
   color: var(--ink-2);
 }
 
+.backup-status {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-weight: var(--fw-semibold);
+}
+
 .privacy {
   flex-direction: row;
   align-items: flex-start;

@@ -1,7 +1,11 @@
 import { exportBackup } from '../backup.js';
+import { backupAge, needsBackup } from '../lib/backup.js';
+import { localDate } from '../lib/dates.js';
 import { nouns, plural } from '../lib/format.js';
-import { button, element, screenHeader, backLink, icon } from '../ui/elements.js';
+import { button, dot, element, screenHeader, backLink, icon } from '../ui/elements.js';
 import { getTheme, setTheme } from '../theme.js';
+
+const days = ['dzień', 'dni', 'dni'];
 
 const themes = [
   ['light', 'Jasny'],
@@ -14,7 +18,7 @@ export function renderData(data) {
   screen.append(
     backLink('#/start', 'Start'),
     screenHeader('Dane i ustawienia'),
-    backupCard(),
+    backupCard(data),
     themeCard(),
     privacyCard(),
     footer(data),
@@ -22,13 +26,32 @@ export function renderData(data) {
   return screen;
 }
 
-function backupCard() {
+function backupCard(data) {
+  const today = localDate(new Date());
+  const status = element('p', 'backup-status');
+  if (needsBackup(data, today)) {
+    status.append(dot());
+  }
+  status.append(backupStatus(backupAge(data, today)));
   const exportButton = button('Eksportuj do pliku', 'button button-primary', exportBackup);
   exportButton.prepend(icon('download'));
   exportButton.dataset.id = 'export';
   const card = element('section', 'card');
-  card.append(element('h2', 'card-title', 'Kopia zapasowa'), exportButton);
+  card.append(element('h2', 'card-title', 'Kopia zapasowa'), status, exportButton);
   return card;
+}
+
+function backupStatus(age) {
+  if (age === null) {
+    return 'Nie masz jeszcze kopii';
+  }
+  if (age <= 0) {
+    return 'Ostatnia kopia dzisiaj';
+  }
+  if (age === 1) {
+    return 'Ostatnia kopia wczoraj';
+  }
+  return `Ostatnia kopia ${plural(age, days)} temu`;
 }
 
 function themeCard() {
