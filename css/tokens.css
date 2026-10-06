@@ -31,6 +31,7 @@
   --accent: #1B5E7B;
   --on-accent: #FFFFFF;
   --accent-soft: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  --accent-mid: color-mix(in srgb, var(--accent) 40%, var(--surface));
 
   /* Warning */
   --warn: #B45F06;
@@ -87,6 +88,7 @@
   --icon-dash: 1.5 3.5;
   --illustration: 150px;
   --marker: 32px;
+  --gauge: 208px;
   --dot: 10px;
   --bar: 10px;
   --bar-sm: 6px;
@@ -127,6 +129,7 @@
   --accent: #7CC0DE;
   --on-accent: #0F1214;
   --accent-soft: color-mix(in srgb, var(--accent) 20%, var(--surface));
+  --accent-mid: color-mix(in srgb, var(--accent) 45%, var(--surface));
 
   --warn: #E0A050;
 }
