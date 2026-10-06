@@ -2,6 +2,13 @@ const numbers = new Intl.NumberFormat('pl-PL');
 const pluralRules = new Intl.PluralRules('pl-PL');
 const formIndex = { one: 0, few: 1, many: 2 };
 
+export const nouns = {
+  stages: ['etap', 'etapy', 'etapów'],
+  steps: ['krok', 'kroki', 'kroków'],
+  questions: ['pytanie', 'pytania', 'pytań'],
+  costs: ['koszt', 'koszty', 'kosztów'],
+};
+
 // Polish formatting leaves four-digit numbers ungrouped by default: 1200, but 12 000.
 const amounts = new Intl.NumberFormat('pl-PL', {
   maximumFractionDigits: 0,

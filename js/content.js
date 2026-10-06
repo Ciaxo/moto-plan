@@ -1,15 +1,8 @@
 import { loadAll, saveAll } from './db.js';
-import { plural } from './lib/format.js';
+import { nouns, plural } from './lib/format.js';
 import { installedPacks, mergePack, validatePack } from './lib/pack.js';
 import { button, element } from './ui/elements.js';
 import { closeSheet, openSheet } from './ui/sheet.js';
-
-const collectionForms = [
-  ['stages', ['etap', 'etapy', 'etapów']],
-  ['steps', ['krok', 'kroki', 'kroków']],
-  ['questions', ['pytanie', 'pytania', 'pytań']],
-  ['costs', ['koszt', 'koszty', 'kosztów']],
-];
 
 const countForms = [
   ['added', ['nowy wpis', 'nowe wpisy', 'nowych wpisów']],
@@ -78,7 +71,7 @@ function summary(pack, installed, { changes, counts }) {
 
 function packContents(pack) {
   const parts = [`Wersja ${pack.version}`];
-  for (const [collection, forms] of collectionForms) {
+  for (const [collection, forms] of Object.entries(nouns)) {
     const count = pack[collection]?.length ?? 0;
     if (count > 0) {
       parts.push(plural(count, forms));
