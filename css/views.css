@@ -268,6 +268,82 @@
   font-weight: var(--fw-semibold);
 }
 
+.budget-label {
+  color: var(--ink-2);
+}
+
+.budget-collected {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--sp-2);
+  color: var(--ink-2);
+}
+
+.budget-amount {
+  color: var(--ink);
+  font-size: var(--fs-40);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-display);
+  line-height: var(--lh-tight);
+}
+
+.budget-amount,
+.figure dd,
+.group-sum,
+.cost-amount {
+  font-variant-numeric: tabular-nums;
+}
+
+.figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3) var(--sp-4);
+  margin: 0;
+}
+
+.figure {
+  flex: 1 1 0;
+  min-width: max-content;
+}
+
+.figure dt {
+  color: var(--ink-2);
+}
+
+.figure dd {
+  margin: 0;
+  font-weight: var(--fw-bold);
+}
+
+.group-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: var(--fw-bold);
+  overflow-wrap: anywhere;
+}
+
+.group-sum {
+  color: var(--ink-2);
+  font-weight: var(--fw-semibold);
+}
+
+.cost-list {
+  border-top: var(--hairline) solid var(--line-soft);
+}
+
+.cost-main {
+  grid-template-columns: 1fr auto;
+  column-gap: var(--sp-3);
+}
+
+.cost-amount {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  align-self: center;
+  font-weight: var(--fw-bold);
+}
+
 .backup-status {
   display: flex;
   align-items: center;
