@@ -1,7 +1,8 @@
 import { save } from '../db.js';
 import { formatDate, localDate } from '../lib/dates.js';
 import { textBlocks } from '../lib/text.js';
-import { backLink, element, icon, screenHeader } from '../ui/elements.js';
+import { backLink, button, element, icon, screenHeader } from '../ui/elements.js';
+import { openQuestionSheet } from './question-sheet.js';
 
 const statuses = [[false, 'Nie wiem'], [true, 'Umiem']];
 const NOTES_DELAY = 1000;
@@ -39,9 +40,18 @@ export function renderQuestion(data, entered, id) {
   const category = data.categories.find((record) => record.id === question.categoryId);
   const header = screenHeader(question.question, { eyebrow: category?.title });
   header.classList.add('question-header');
+  const edit = button(null, 'icon-button', () => {
+    flushNotes();
+    openQuestionSheet(data, { question: shown });
+  });
+  edit.append(icon('edit'));
+  edit.setAttribute('aria-label', 'Edytuj pytanie');
+  edit.dataset.id = 'edit-question';
+  const top = element('div', 'screen-top');
+  top.append(backLink('#/wiedza', 'Baza wiedzy'), edit);
   const screen = document.createDocumentFragment();
   screen.append(
-    backLink('#/wiedza', 'Baza wiedzy'),
+    top,
     header,
     statusSwitch(question),
     answerCard(question.answer),

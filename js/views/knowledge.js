@@ -1,7 +1,8 @@
 import { nouns, plural } from '../lib/format.js';
 import { ordered } from '../lib/order.js';
 import { matches } from '../lib/search.js';
-import { element, icon, screenHeader, select } from '../ui/elements.js';
+import { addButton, button, element, icon, screenHeader, select } from '../ui/elements.js';
+import { openQuestionSheet } from './question-sheet.js';
 
 const emptyText = 'Baza wiedzy składa się z pytań i odpowiedzi w kategoriach. '
   + 'Dodaj pierwsze pytanie.';
@@ -13,9 +14,14 @@ export function renderKnowledge(data) {
   const questions = categoryQuestions(categories, data.questions);
   const eyebrow = `${plural(questions.length, nouns.questions)} · ${countKnown(questions)} umiem`;
   const screen = document.createDocumentFragment();
-  screen.append(screenHeader('Baza wiedzy', { eyebrow }));
+  const addQuestion = () => openQuestionSheet(data, { categoryId });
+  const add = button(null, 'icon-button icon-button-primary', addQuestion);
+  add.append(icon('plus'));
+  add.setAttribute('aria-label', 'Dodaj pytanie');
+  add.dataset.id = 'add-question';
+  screen.append(screenHeader('Baza wiedzy', { eyebrow, action: add }));
   if (questions.length === 0) {
-    screen.append(messageCard(emptyText));
+    screen.append(messageCard(emptyText, addQuestion));
     return screen;
   }
   if (!categories.some((category) => category.id === categoryId)) {
@@ -31,7 +37,7 @@ export function renderKnowledge(data) {
       : questions;
     summary.replaceChildren(...summaryParts(inCategory));
     const found = inCategory.filter((question) => matches(question, phrase));
-    results.replaceChildren(questionList(found, titles));
+    results.replaceChildren(questionList(found, titles, addQuestion));
   };
   update();
   screen.append(
@@ -52,9 +58,13 @@ function countKnown(questions) {
   return questions.filter((question) => question.known).length;
 }
 
-function messageCard(text) {
+// Same data-id as the "+" in the header, which takes the focus when this card disappears.
+function messageCard(text, addQuestion) {
   const card = element('section', 'card');
-  card.append(element('p', null, text));
+  card.append(
+    element('p', null, text),
+    addButton('Dodaj pytanie', 'add-question', addQuestion),
+  );
   return card;
 }
 
@@ -106,9 +116,9 @@ function summaryParts(questions) {
   return [bar, counts];
 }
 
-function questionList(questions, titles) {
+function questionList(questions, titles, addQuestion) {
   if (questions.length === 0) {
-    return messageCard('Nic nie znaleziono');
+    return messageCard('Nic nie znaleziono', addQuestion);
   }
   const list = element('ul', 'card list');
   for (const question of questions) {
