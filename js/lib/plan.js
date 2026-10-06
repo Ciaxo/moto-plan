@@ -1,3 +1,5 @@
+import { ordered } from './order.js';
+
 export function planStages(stages, steps) {
   const liveSteps = ordered(steps);
   return ordered(stages).map((stage) => ({
@@ -26,22 +28,12 @@ export function progress(steps) {
   return Math.floor((countDone(steps) * 100) / steps.length);
 }
 
-export function nextOrder(records) {
-  return Math.max(0, ...records.map((record) => record.order)) + 1;
-}
-
 export function nextSteps(plan) {
   // The sort is stable, so steps with the same due end keep plan order: stage, then step.
   return plan
     .flatMap(({ steps }) => steps.filter((step) => !step.done))
     .sort((a, b) => dueEnd(a.dueDate).localeCompare(dueEnd(b.dueDate)))
     .slice(0, 3);
-}
-
-function ordered(records) {
-  return records
-    .filter((record) => !record.deleted)
-    .sort((a, b) => a.order - b.order || a.createdAt.localeCompare(b.createdAt));
 }
 
 // "Some time in 2027" ends after "12 February 2027", and steps without a date go last.

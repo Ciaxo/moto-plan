@@ -1,9 +1,10 @@
 import { backupAge, mergeBackup, needsBackup, validateBackup } from '../js/lib/backup.js';
 import { daysBetween, formatDate, localDate } from '../js/lib/dates.js';
 import { formatAmount, plural } from '../js/lib/format.js';
+import { nextOrder } from '../js/lib/order.js';
 import { editRecord, mergePack, validatePack } from '../js/lib/pack.js';
 import {
-  currentStage, isClosed, nextOrder, nextSteps, planStages, progress,
+  currentStage, isClosed, nextSteps, planStages, progress,
 } from '../js/lib/plan.js';
 import { element, screenHeader } from '../js/ui/elements.js';
 

@@ -1,6 +1,6 @@
 import { remove, save } from '../db.js';
 import { editRecord } from '../lib/pack.js';
-import { nextOrder } from '../lib/plan.js';
+import { nextOrder } from '../lib/order.js';
 import { button, element, field } from '../ui/elements.js';
 import { closeSheet, openConfirm, openSheet } from '../ui/sheet.js';
 
