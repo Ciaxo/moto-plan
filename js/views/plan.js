@@ -1,3 +1,4 @@
+import { save } from '../db.js';
 import { formatDate, localDate } from '../lib/dates.js';
 import { formatAmount, plural } from '../lib/format.js';
 import { countDone, currentStage, isClosed, planStages } from '../lib/plan.js';
@@ -5,26 +6,40 @@ import { element, icon, screenHeader } from '../ui/elements.js';
 
 const stepsGenitive = ['kroku', 'kroków', 'kroków'];
 const expanded = new Set();
+let lastCurrentId;
 
 export function renderPlan(data, entered) {
   const plan = planStages(data.stages, data.steps);
   const current = currentStage(plan);
-  if (entered) {
-    expanded.clear();
-    if (current) {
-      expanded.add(current.stage.id);
-    }
-  }
+  expandCurrent(current, entered);
   const today = localDate(new Date());
+  const steps = plan.flatMap((entry) => entry.steps);
   const timeline = element('ol', 'timeline');
   plan.forEach((entry, index) => {
     timeline.append(stageItem(entry, index + 1, entry === current, today));
   });
-  const steps = plan.flatMap((entry) => entry.steps);
+  timeline.addEventListener('change', (event) => toggleStep(steps, event.target));
   const eyebrow = `${countDone(steps)} z ${plural(steps.length, stepsGenitive)}`;
   const screen = document.createDocumentFragment();
   screen.append(screenHeader('Plan', { eyebrow }), timeline);
   return screen;
+}
+
+function expandCurrent(current, entered) {
+  if (entered) {
+    expanded.clear();
+  }
+  const id = current?.stage.id;
+  if (id && (entered || id !== lastCurrentId)) {
+    expanded.add(id);
+  }
+  lastCurrentId = id;
+}
+
+function toggleStep(steps, checkbox) {
+  const step = steps.find((item) => item.id === checkbox.value);
+  const done = checkbox.checked;
+  save('steps', { ...step, done, doneAt: done ? new Date().toISOString() : null });
 }
 
 function stageItem({ stage, steps }, number, isCurrent, today) {
@@ -85,6 +100,7 @@ function stepRow(step, today) {
   const checkbox = element('input');
   checkbox.type = 'checkbox';
   checkbox.checked = step.done;
+  checkbox.value = step.id;
   checkbox.dataset.id = `done-${step.id}`;
   checkbox.setAttribute('aria-label', step.title);
   const mark = icon('check');
