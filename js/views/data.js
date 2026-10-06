@@ -1,5 +1,5 @@
 import { nouns, plural } from '../lib/format.js';
-import { element, screenHeader, backLink } from '../ui/elements.js';
+import { element, screenHeader, backLink, icon } from '../ui/elements.js';
 import { getTheme, setTheme } from '../theme.js';
 
 const themes = [
@@ -14,6 +14,7 @@ export function renderData(data) {
     backLink('#/start', 'Start'),
     screenHeader('Dane i ustawienia'),
     themeCard(),
+    privacyCard(),
     footer(data),
   );
   return screen;
@@ -37,6 +38,18 @@ function themeCard() {
   }
   options.addEventListener('change', (event) => setTheme(event.target.value));
   card.append(element('h2', 'card-title', 'Wygląd'), options);
+  return card;
+}
+
+function privacyCard() {
+  const text = element('div');
+  text.append(
+    element('h2', 'privacy-title', 'Aplikacja nie wysyła żadnych danych'),
+    element('p', 'privacy-text', 'Wszystko jest zapisane tylko na tym urządzeniu. '
+      + 'Bez konta, bez chmury, bez statystyk.'),
+  );
+  const card = element('section', 'card privacy');
+  card.append(icon('shield'), text);
   return card;
 }
 

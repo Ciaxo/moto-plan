@@ -171,6 +171,25 @@
   color: var(--ink-2);
 }
 
+.privacy {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.privacy > .icon {
+  color: var(--accent);
+}
+
+.privacy-title {
+  font-size: var(--fs-16);
+  font-weight: var(--fw-semibold);
+}
+
+.privacy-text {
+  color: var(--ink-2);
+  font-size: var(--fs-14);
+}
+
 .screen-footer {
   color: var(--ink-2);
   font-size: var(--fs-14);
