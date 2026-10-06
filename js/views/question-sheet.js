@@ -1,8 +1,8 @@
-import { saveAll } from '../db.js';
+import { remove, saveAll } from '../db.js';
 import { nextOrder, ordered } from '../lib/order.js';
 import { editRecord } from '../lib/pack.js';
 import { button, element, field, select } from '../ui/elements.js';
-import { closeSheet, openSheet } from '../ui/sheet.js';
+import { closeSheet, openConfirm, openSheet } from '../ui/sheet.js';
 
 const answerHint = 'Pusta linia zaczyna nowy akapit, a linia od „- " punkt listy.';
 // No record has an empty id, so this option cannot be mistaken for a category.
@@ -73,6 +73,9 @@ export function openQuestionSheet(data, { question, categoryId }) {
     submit,
     button('Anuluj', 'button', closeSheet),
   );
+  if (question) {
+    form.append(button('Usuń pytanie', 'button button-secondary', () => confirmRemove(question)));
+  }
   showCategoryName();
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -81,6 +84,15 @@ export function openQuestionSheet(data, { question, categoryId }) {
     closeSheet();
   });
   openSheet(question ? 'Edytuj pytanie' : 'Nowe pytanie', form);
+}
+
+// The question screen then finds no question and goes back to the list (location.replace).
+function confirmRemove(question) {
+  const text = `Pytanie „${question.question}" zniknie z bazy wiedzy.`;
+  openConfirm('Usunąć pytanie?', text, 'Usuń pytanie', async () => {
+    await remove('questions', question.id);
+    closeSheet();
+  });
 }
 
 function formValues(fields) {
