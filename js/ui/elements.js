@@ -64,20 +64,26 @@ export function select(name, options, value) {
   return wrapper;
 }
 
+export function segmented(name, options, value) {
+  const group = element('fieldset', 'segmented');
+  for (const [optionValue, label] of options) {
+    const input = Object.assign(element('input'), {
+      type: 'radio',
+      name,
+      value: optionValue,
+      checked: optionValue === value,
+    });
+    input.dataset.id = `${name}-${optionValue}`;
+    const option = element('label', 'segment');
+    option.append(input, label);
+    group.append(option);
+  }
+  return group;
+}
+
 export function dueField(dueDate) {
   const savedKind = kindByLength[dueDate.length];
-  const kinds = element('div', 'segmented');
-  for (const [kind, label] of dueKinds) {
-    const radio = Object.assign(element('input'), {
-      type: 'radio',
-      name: 'due-kind',
-      value: kind,
-      checked: kind === savedKind,
-    });
-    const option = element('label', 'segment');
-    option.append(radio, label);
-    kinds.append(option);
-  }
+  const kinds = segmented('due-kind', dueKinds, savedKind);
   const group = element('fieldset', 'field');
   group.append(element('legend', 'field-label', 'Termin'), kinds);
   let input = dueInput(savedKind, dueDate);

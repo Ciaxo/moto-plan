@@ -1,7 +1,7 @@
 import { save } from '../db.js';
 import { formatDate, localDate } from '../lib/dates.js';
 import { textBlocks } from '../lib/text.js';
-import { backLink, button, element, icon, screenHeader } from '../ui/elements.js';
+import { backLink, button, element, icon, screenHeader, segmented } from '../ui/elements.js';
 import { openQuestionSheet } from './question-sheet.js';
 
 const statuses = [[false, 'Nie wiem'], [true, 'Umiem']];
@@ -64,20 +64,9 @@ export function renderQuestion(data, entered, id) {
 }
 
 function statusSwitch(question) {
-  const options = element('fieldset', 'segmented segmented-accent');
+  const options = segmented('known', statuses, question.known);
+  options.classList.add('segmented-accent');
   options.setAttribute('aria-label', 'Status');
-  for (const [known, label] of statuses) {
-    const input = Object.assign(element('input'), {
-      type: 'radio',
-      name: 'known',
-      value: String(known),
-      checked: known === question.known,
-    });
-    input.dataset.id = `known-${known}`;
-    const option = element('label', 'segment');
-    option.append(input, label);
-    options.append(option);
-  }
   options.addEventListener('change', (event) => {
     const known = event.target.value === 'true';
     save('questions', { ...shown, known, knownAt: known ? new Date().toISOString() : null });

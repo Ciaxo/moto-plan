@@ -4,7 +4,7 @@ import { backupAge, needsBackup } from '../lib/backup.js';
 import { formatDate, localDate } from '../lib/dates.js';
 import { nouns, plural } from '../lib/format.js';
 import { installedPacks } from '../lib/pack.js';
-import { button, dot, element, screenHeader, backLink, icon } from '../ui/elements.js';
+import { button, dot, element, screenHeader, backLink, icon, segmented } from '../ui/elements.js';
 import { openConfirm } from '../ui/sheet.js';
 import { forgetTheme, setTheme } from '../theme.js';
 
@@ -98,21 +98,10 @@ function contentCard(data, today) {
 
 function themeCard(data) {
   const card = element('section', 'card');
-  const options = element('fieldset', 'segmented');
-  options.setAttribute('aria-label', 'Wygląd');
   // From the data, not from theme.js: after a backup import the theme there is applied a bit later.
   const current = data.settings.find((record) => record.id === 'theme')?.value ?? 'system';
-  for (const [value, label] of themes) {
-    const input = element('input');
-    input.type = 'radio';
-    input.name = 'theme';
-    input.value = value;
-    input.checked = value === current;
-    input.dataset.id = `theme-${value}`;
-    const option = element('label', 'segment');
-    option.append(input, label);
-    options.append(option);
-  }
+  const options = segmented('theme', themes, current);
+  options.setAttribute('aria-label', 'Wygląd');
   options.addEventListener('change', (event) => setTheme(event.target.value));
   card.append(element('h2', 'card-title', 'Wygląd'), options);
   return card;
