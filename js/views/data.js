@@ -1,7 +1,8 @@
 import { exportBackup, importFile } from '../backup.js';
 import { backupAge, needsBackup } from '../lib/backup.js';
-import { localDate } from '../lib/dates.js';
+import { formatDate, localDate } from '../lib/dates.js';
 import { nouns, plural } from '../lib/format.js';
+import { installedPacks } from '../lib/pack.js';
 import { button, dot, element, screenHeader, backLink, icon } from '../ui/elements.js';
 import { setTheme } from '../theme.js';
 
@@ -14,11 +15,13 @@ const themes = [
 ];
 
 export function renderData(data) {
+  const today = localDate(new Date());
   const screen = document.createDocumentFragment();
   screen.append(
     backLink('#/start', 'Start'),
     screenHeader('Dane i ustawienia'),
-    backupCard(data),
+    backupCard(data, today),
+    contentCard(data, today),
     themeCard(data),
     privacyCard(),
     footer(data),
@@ -26,8 +29,7 @@ export function renderData(data) {
   return screen;
 }
 
-function backupCard(data) {
-  const today = localDate(new Date());
+function backupCard(data, today) {
   const status = element('p', 'backup-status');
   if (needsBackup(data, today)) {
     status.append(dot());
@@ -62,6 +64,31 @@ function backupStatus(age) {
     return 'Ostatnia kopia wczoraj';
   }
   return `Ostatnia kopia ${plural(age, days)} temu`;
+}
+
+function contentCard(data, today) {
+  const packs = Object.values(installedPacks(data));
+  const card = element('section', 'card');
+  card.append(element('h2', 'card-title', 'Treść'));
+  if (packs.length === 0) {
+    card.append(element('p', null, 'Nie wczytano żadnej paczki'));
+  } else {
+    const list = element('ul', 'list');
+    for (const pack of packs) {
+      const loaded = formatDate(localDate(new Date(pack.importedAt)), today);
+      const item = element('li', 'row pack-row');
+      item.append(
+        element('span', 'row-title', pack.title),
+        element('span', 'row-meta', `Wersja ${pack.version} · wczytana ${loaded}`),
+      );
+      list.append(item);
+    }
+    card.append(list);
+  }
+  const loadPack = button('Wczytaj paczkę treści', 'button button-secondary', importFile);
+  loadPack.dataset.id = 'import-pack';
+  card.append(loadPack);
+  return card;
 }
 
 function themeCard(data) {
