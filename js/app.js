@@ -44,7 +44,10 @@ function show(entered) {
   const screen = id === undefined
     ? screens[name](data, entered)
     : renderQuestion(data, entered, id);
-  main.replaceChildren(screen);
+  // null means the screen is up to date, as on the question screen after its notes were saved.
+  if (screen) {
+    main.replaceChildren(screen);
+  }
   markTab(name);
 }
 

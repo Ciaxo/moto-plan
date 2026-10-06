@@ -257,6 +257,11 @@
   color: var(--ink-2);
 }
 
+.notes-changed {
+  color: var(--ink-2);
+  font-size: var(--fs-14);
+}
+
 .source {
   flex-direction: row;
   align-items: center;
