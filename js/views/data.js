@@ -1,3 +1,4 @@
+import { nouns, plural } from '../lib/format.js';
 import { element, screenHeader, backLink } from '../ui/elements.js';
 import { getTheme, setTheme } from '../theme.js';
 
@@ -7,9 +8,14 @@ const themes = [
   ['system', 'Jak system'],
 ];
 
-export function renderData() {
+export function renderData(data) {
   const screen = document.createDocumentFragment();
-  screen.append(backLink('#/start', 'Start'), screenHeader('Dane i ustawienia'), themeCard());
+  screen.append(
+    backLink('#/start', 'Start'),
+    screenHeader('Dane i ustawienia'),
+    themeCard(),
+    footer(data),
+  );
   return screen;
 }
 
@@ -32,4 +38,13 @@ function themeCard() {
   options.addEventListener('change', (event) => setTheme(event.target.value));
   card.append(element('h2', 'card-title', 'Wygląd'), options);
   return card;
+}
+
+function footer(data) {
+  const counts = ['steps', 'questions', 'costs'].map((store) => {
+    const count = data[store].filter((record) => !record.deleted).length;
+    return plural(count, nouns[store]);
+  });
+  const text = [`Moto Plan ${self.APP_VERSION}`, ...counts].join(' · ');
+  return element('footer', 'screen-footer', text);
 }

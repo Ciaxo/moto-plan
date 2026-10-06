@@ -170,3 +170,9 @@
 .stage .row:has(:checked) .row-title {
   color: var(--ink-2);
 }
+
+.screen-footer {
+  color: var(--ink-2);
+  font-size: var(--fs-14);
+  text-align: center;
+}
