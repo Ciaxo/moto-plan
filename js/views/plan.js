@@ -2,7 +2,7 @@ import { save } from '../db.js';
 import { formatDate, localDate } from '../lib/dates.js';
 import { formatAmount, plural } from '../lib/format.js';
 import { countDone, currentStage, isClosed, planStages } from '../lib/plan.js';
-import { button, element, icon, screenHeader } from '../ui/elements.js';
+import { addButton, button, element, icon, screenHeader } from '../ui/elements.js';
 import { openStageSheet } from './stage-sheet.js';
 import { openStepSheet } from './step-sheet.js';
 
@@ -123,13 +123,6 @@ function stageBody(entry, { plan, today }) {
   const body = element('div', 'stage-body');
   body.append(progress, list, actions);
   return body;
-}
-
-function addButton(label, id, onClick) {
-  const node = button(label, 'button button-add', onClick);
-  node.prepend(icon('plus'));
-  node.dataset.id = id;
-  return node;
 }
 
 function stepRow(step, today) {

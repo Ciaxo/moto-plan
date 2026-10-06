@@ -18,6 +18,13 @@ export function button(label, className, onClick) {
   return node;
 }
 
+export function addButton(label, id, onClick) {
+  const node = button(label, 'button button-add', onClick);
+  node.prepend(icon('plus'));
+  node.dataset.id = id;
+  return node;
+}
+
 export function screenHeader(title, { eyebrow, action } = {}) {
   const header = element('header', 'screen-header');
   if (eyebrow) {
