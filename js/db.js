@@ -22,20 +22,33 @@ export function getOne(store, id) {
   return requestDone(db.transaction(store).objectStore(store).get(id));
 }
 
-export async function save(store, record) {
-  const existing = await getOne(store, record.id);
+export async function loadAll() {
+  const lists = await Promise.all(STORES.map((store) => getAll(store)));
+  return Object.fromEntries(STORES.map((store, index) => [store, lists[index]]));
+}
+
+export async function saveAll(changes) {
   const now = new Date().toISOString();
-  const saved = {
-    ...record,
-    createdAt: existing?.createdAt ?? now,
-    updatedAt: now,
-    deleted: record.deleted ?? false,
-  };
-  const transaction = db.transaction(store, 'readwrite');
-  transaction.objectStore(store).put(saved);
+  const transaction = db.transaction(STORES, 'readwrite');
+  for (const { store, record } of changes) {
+    const records = transaction.objectStore(store);
+    const reading = records.get(record.id);
+    // A request made in a success handler keeps the transaction open, so all writes commit at once.
+    reading.onsuccess = () => {
+      records.put({
+        ...record,
+        createdAt: reading.result?.createdAt ?? now,
+        updatedAt: now,
+        deleted: record.deleted ?? false,
+      });
+    };
+  }
   await transactionDone(transaction);
   window.dispatchEvent(new Event('datachange'));
-  return saved;
+}
+
+export function save(store, record) {
+  return saveAll([{ store, record }]);
 }
 
 export async function remove(store, id) {
