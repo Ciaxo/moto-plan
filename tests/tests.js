@@ -6,6 +6,7 @@ import { editRecord, mergePack, validatePack } from '../js/lib/pack.js';
 import {
   currentStage, isClosed, nextSteps, planStages, progress,
 } from '../js/lib/plan.js';
+import { matches } from '../js/lib/search.js';
 import { element, screenHeader } from '../js/ui/elements.js';
 
 const results = [];
@@ -593,6 +594,47 @@ test('kopia: liczniki zgadzają się ze zmianami we wszystkich magazynach', () =
       ['stages/s2', 'steps/k1', 'steps/k3', 'settings/theme'],
     ],
   );
+});
+
+function question(fields) {
+  return { question: '', answer: '', notes: '', ...fields };
+}
+
+test('wyszukiwanie: bez rozróżniania wielkości liter i polskich znaków', () => {
+  const chain = question({ question: 'Jak smarować i napinać łańcuch?' });
+  assertEqual(
+    ['lancuch', 'ŁAŃCUCH', 'napinac', 'Smarować'].map((phrase) => matches(chain, phrase)),
+    [true, true, true, true],
+  );
+});
+
+test('wyszukiwanie: każde słowo frazy, w dowolnej kolejności', () => {
+  const insurance = question({ question: 'Czym różni się OC od AC?' });
+  assertEqual(
+    ['oc ac', 'ac oc', '  oc   ac ', 'oc kask'].map((phrase) => matches(insurance, phrase)),
+    [true, true, true, false],
+  );
+});
+
+test('wyszukiwanie: także w odpowiedzi i notatkach', () => {
+  const record = question({
+    question: 'Co zrobić po kolizji?',
+    answer: 'Zrób zdjęcia.',
+    notes: 'Numer do ubezpieczyciela',
+  });
+  assertEqual(
+    ['zdjecia', 'ubezpieczyciela', 'kolizji zdjecia'].map((phrase) => matches(record, phrase)),
+    [true, true, true],
+  );
+});
+
+test('wyszukiwanie: słowo nie łączy końca jednego pola z początkiem następnego', () => {
+  assertEqual(matches(question({ question: 'kask', answer: 'opona' }), 'kasko'), false);
+});
+
+test('wyszukiwanie: pusta fraza i same spacje pasują do każdego pytania', () => {
+  const record = question({ question: 'Co zrobić po kolizji?' });
+  assertEqual([matches(record, ''), matches(record, '   ')], [true, true]);
 });
 
 showResults();
