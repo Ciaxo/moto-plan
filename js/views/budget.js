@@ -67,10 +67,10 @@ function summaryCard(totals) {
     element('span', 'budget-amount', formatAmount(totals.collected)),
     `z ${formatAmount(totals.total)}`,
   );
+  // The percent, not the amounts: without costs a max of 0 would turn into 1 and fill the bar.
   const bar = element('progress', 'progress');
-  // A max of 0 is ignored, so without costs the bar stays empty.
-  bar.max = totals.total;
-  bar.value = totals.collected;
+  bar.max = 100;
+  bar.value = totals.percent;
   bar.setAttribute('aria-label', 'Zebrane');
   const card = element('section', 'card');
   card.append(
