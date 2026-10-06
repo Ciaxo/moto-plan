@@ -92,7 +92,7 @@
   place-items: center;
   width: var(--marker);
   height: var(--marker);
-  border: var(--border-thick) solid var(--ring);
+  border: var(--border-thick) solid var(--border-strong);
   border-radius: var(--r-full);
   background: var(--bg);
   color: var(--ink-2);
