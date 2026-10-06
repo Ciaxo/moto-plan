@@ -8,18 +8,21 @@ const COLLECTIONS = {
     name: 'Kroki',
     label: 'Krok',
     fields: ['stageId', 'order', 'title', 'dueDate', 'cost', 'hint'],
+    userFields: { done: false, doneAt: null, note: '' },
   },
   categories: { name: 'Kategorie', label: 'Kategoria', fields: ['order', 'title'] },
   questions: {
     name: 'Pytania',
     label: 'Pytanie',
     fields: ['categoryId', 'order', 'question', 'answer', 'sourceTitle', 'sourceUrl'],
+    userFields: { known: false, knownAt: null, notes: '', notesAt: null },
   },
   goals: { name: 'Cele', label: 'Cel', fields: ['order', 'title'] },
   costs: {
     name: 'Koszty',
     label: 'Koszt',
     fields: ['order', 'title', 'amount', 'group', 'goalId', 'date'],
+    userFields: { status: 'planned', paidAt: null, note: '' },
   },
 };
 
@@ -160,4 +163,66 @@ function fieldProblems(record, fields, ids) {
     }
   }
   return problems;
+}
+
+export function mergePack(pack, data) {
+  const changes = [];
+  const counts = { added: 0, updated: 0, unchanged: 0, skipped: 0 };
+  const deletedStages = new Set(
+    data.stages.filter((stage) => stage.deleted).map((stage) => stage.id),
+  );
+  for (const collection of Object.keys(COLLECTIONS)) {
+    const existing = new Map(data[collection].map((record) => [record.id, record]));
+    (pack[collection] ?? []).forEach((record, index) => {
+      const content = contentOf(record, COLLECTIONS[collection].fields, index);
+      const current = existing.get(record.id);
+      const merged = current
+        ? mergeExisting(collection, content, current)
+        : mergeNew(collection, content, pack.packId, deletedStages);
+      counts[merged.outcome] += 1;
+      if (merged.record) {
+        changes.push({ store: collection, record: merged.record });
+      }
+    });
+  }
+  return { changes, counts };
+}
+
+function contentOf(record, fields, index) {
+  const content = { id: record.id };
+  for (const field of fields) {
+    content[field] = record[field] ?? fallback(field, index);
+  }
+  return content;
+}
+
+function fallback(field, index) {
+  if (field === 'order') {
+    return index + 1;
+  }
+  if (field === 'cost') {
+    return null;
+  }
+  return '';
+}
+
+function mergeNew(collection, content, packId, deletedStages) {
+  // A step of a deleted stage would count towards progress without being shown anywhere.
+  if (collection === 'steps' && deletedStages.has(content.stageId)) {
+    return { outcome: 'skipped' };
+  }
+  const { userFields } = COLLECTIONS[collection];
+  const record = { ...content, origin: 'pack', packId, userModified: false, ...userFields };
+  return { outcome: 'added', record };
+}
+
+function mergeExisting(collection, content, current) {
+  if (current.deleted || current.userModified) {
+    return { outcome: 'skipped' };
+  }
+  // Rewriting an unchanged record would raise updatedAt and let it win a later backup merge.
+  if (COLLECTIONS[collection].fields.every((field) => current[field] === content[field])) {
+    return { outcome: 'unchanged' };
+  }
+  return { outcome: 'updated', record: { ...current, ...content } };
 }

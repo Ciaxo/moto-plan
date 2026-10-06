@@ -1,5 +1,5 @@
 import { plural } from '../js/lib/format.js';
-import { validatePack } from '../js/lib/pack.js';
+import { mergePack, validatePack } from '../js/lib/pack.js';
 import { element, screenHeader } from '../js/ui/elements.js';
 
 const results = [];
@@ -165,6 +165,88 @@ test('paczka: odrzuca kolekcję, która nie jest listą, i pozycję bez identyfi
     'Etapy: pozycja 2 nie ma identyfikatora.',
     'Koszty muszą być listą.',
   ]);
+});
+
+function imported(pack) {
+  const data = emptyData();
+  for (const { store, record } of mergePack(pack, data).changes) {
+    data[store].push(record);
+  }
+  return data;
+}
+
+function stepChange(changes) {
+  return changes.find((change) => change.store === 'steps').record;
+}
+
+test('łączenie: nowy rekord dostaje pochodzenie z paczki i domyślne pola', () => {
+  const { changes, counts } = mergePack(smallPack(), emptyData());
+  assertEqual(counts, { added: 6, updated: 0, unchanged: 0, skipped: 0 });
+  assertEqual(stepChange(changes), {
+    id: 'k1', stageId: 's1', order: 1, title: 'Egzamin', dueDate: '2027-02', cost: 59, hint: '',
+    origin: 'pack', packId: 'test', userModified: false, done: false, doneAt: null, note: '',
+  });
+});
+
+test('łączenie: pomija pola spoza listy pól treści', () => {
+  const pack = smallPack();
+  Object.assign(pack.steps[0], { done: true, note: 'z paczki', _uwaga: 'pomiń' });
+  const record = stepChange(mergePack(pack, emptyData()).changes);
+  assertEqual([record.done, record.note, '_uwaga' in record], [false, '', false]);
+});
+
+test('łączenie: zmienia tylko pola treści, pola użytkownika zostają', () => {
+  const data = imported(smallPack());
+  Object.assign(data.steps[0], { done: true, note: 'Moja notatka', createdAt: '2026-10-01' });
+  const pack = smallPack();
+  pack.steps[0].title = 'Egzamin teoretyczny';
+  const { changes, counts } = mergePack(pack, data);
+  assertEqual(counts, { added: 0, updated: 1, unchanged: 5, skipped: 0 });
+  const record = stepChange(changes);
+  assertEqual(
+    [record.title, record.done, record.note, record.createdAt],
+    ['Egzamin teoretyczny', true, 'Moja notatka', '2026-10-01'],
+  );
+});
+
+test('łączenie: rekordów bez zmian nie zapisuje', () => {
+  assertEqual(mergePack(smallPack(), imported(smallPack())), {
+    changes: [],
+    counts: { added: 0, updated: 0, unchanged: 6, skipped: 0 },
+  });
+});
+
+test('łączenie: nie rusza rekordu zmienionego przez użytkownika', () => {
+  const data = imported(smallPack());
+  Object.assign(data.steps[0], { title: 'Mój tytuł', userModified: true });
+  const pack = smallPack();
+  pack.steps[0].title = 'Egzamin teoretyczny';
+  assertEqual(mergePack(pack, data), {
+    changes: [],
+    counts: { added: 0, updated: 0, unchanged: 5, skipped: 1 },
+  });
+});
+
+test('łączenie: nie przywraca usuniętego rekordu', () => {
+  const data = imported(smallPack());
+  data.questions[0].deleted = true;
+  const pack = smallPack();
+  pack.questions[0].question = 'Czym jest OC i AC?';
+  assertEqual(mergePack(pack, data), {
+    changes: [],
+    counts: { added: 0, updated: 0, unchanged: 5, skipped: 1 },
+  });
+});
+
+test('łączenie: pomija nowy krok usuniętego etapu', () => {
+  const data = emptyData();
+  data.stages.push({ id: 's1', title: 'Teoria', deleted: true });
+  const { changes, counts } = mergePack(smallPack(), data);
+  assertEqual(counts, { added: 4, updated: 0, unchanged: 0, skipped: 2 });
+  assertEqual(
+    changes.map((change) => change.store),
+    ['categories', 'questions', 'goals', 'costs'],
+  );
 });
 
 showResults();
