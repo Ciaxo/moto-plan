@@ -13,7 +13,7 @@ Early development.
 - [x] App shell and navigation
 - [x] UI components, light and dark theme
 - [x] Local database and content packs
-- [ ] Plan screen
+- [x] Plan screen
 - [ ] Backup export and import
 - [ ] Knowledge base
 - [ ] Budget
@@ -42,7 +42,7 @@ Open `http://localhost:8000`.
 
 ## Content packs
 
-The app starts empty. Its content (stages, steps, questions, goals and costs) comes from a JSON file called a content pack. On first start the app offers to load the bundled example pack.
+The app starts empty. Its content (stages, steps, questions, goals and costs) comes from a JSON file called a content pack. On first start the app offers to load the bundled example pack or to start with an empty plan. Stages and steps can also be added, edited and deleted in the app.
 
 A minimal pack:
 
