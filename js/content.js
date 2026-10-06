@@ -7,6 +7,11 @@ import { closeSheet, openErrors, openSheet } from './ui/sheet.js';
 const countForms = [
   ['added', ['nowy wpis', 'nowe wpisy', 'nowych wpisów']],
   ['updated', ['wpis do aktualizacji', 'wpisy do aktualizacji', 'wpisów do aktualizacji']],
+  ['newer', [
+    'wpis nowszy niż w aplikacji',
+    'wpisy nowsze niż w aplikacji',
+    'wpisów nowszych niż w aplikacji',
+  ]],
   ['unchanged', ['wpis bez zmian', 'wpisy bez zmian', 'wpisów bez zmian']],
   ['skipped', [
     'pominięty wpis (zmieniony albo usunięty w aplikacji)',
@@ -86,7 +91,7 @@ function packContents(pack) {
   return parts.join(' · ');
 }
 
-function countList(counts) {
+export function countList(counts) {
   const list = element('ul');
   for (const [key, forms] of countForms) {
     if (counts[key] > 0) {

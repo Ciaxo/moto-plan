@@ -1,7 +1,16 @@
-import { loadAll, save } from './db.js';
-import { SCHEMA_VERSION } from './lib/backup.js';
-import { localDate } from './lib/dates.js';
-import { element } from './ui/elements.js';
+import { countList, importPack } from './content.js';
+import { loadAll, restoreAll, save } from './db.js';
+import { mergeBackup, SCHEMA_VERSION, validateBackup } from './lib/backup.js';
+import { formatDate, localDate } from './lib/dates.js';
+import { loadTheme } from './theme.js';
+import { button, element } from './ui/elements.js';
+import { closeSheet, openErrors, openSheet } from './ui/sheet.js';
+
+const fileTitle = 'Nie można wczytać pliku';
+const readError = 'Nie udało się odczytać pliku.';
+const unknownFile = 'Ten plik nie jest kopią zapasową ani paczką treści Moto Plan.';
+const backupTitle = 'Nie można wczytać kopii';
+const saveError = 'Nie udało się wczytać kopii. Dane w aplikacji się nie zmieniły.';
 
 export async function exportBackup() {
   const now = new Date();
@@ -24,4 +33,73 @@ function download(name, text) {
   link.href = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
   link.download = name;
   link.click();
+}
+
+export function importFile() {
+  const input = element('input');
+  input.type = 'file';
+  input.accept = 'application/json,.json';
+  input.addEventListener('change', () => openFile(input.files[0]));
+  input.click();
+}
+
+async function openFile(file) {
+  let text;
+  try {
+    text = await file.text();
+  } catch {
+    openErrors(fileTitle, [readError]);
+    return;
+  }
+  const content = parse(text);
+  if (content?.app === 'moto-plan' && content.type === 'content') {
+    importPack(content);
+  } else if (content?.app === 'moto-plan' && content.type === 'backup') {
+    importBackup(content);
+  } else {
+    openErrors(fileTitle, [unknownFile]);
+  }
+}
+
+function parse(text) {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+async function importBackup(backup) {
+  const data = await loadAll();
+  const errors = validateBackup(backup, data);
+  if (errors.length > 0) {
+    openErrors(backupTitle, errors);
+    return;
+  }
+  const { changes, counts } = mergeBackup(backup, data);
+  const date = formatDate(localDate(new Date(backup.exportedAt)), localDate(new Date()));
+  const merge = button('Połącz', 'button button-primary', () => {
+    merge.disabled = true;
+    restore(changes);
+  });
+  const body = document.createDocumentFragment();
+  body.append(
+    element('p', null, `Kopia z ${date}`),
+    countList(counts),
+    merge,
+    button('Anuluj', 'button', closeSheet),
+  );
+  openSheet('Wczytać kopię?', body);
+}
+
+async function restore(changes) {
+  try {
+    await restoreAll(changes);
+  } catch {
+    openErrors(backupTitle, [saveError]);
+    return;
+  }
+  // Closed before the redraw ends, so focus returns to the import button and survives it.
+  closeSheet();
+  await loadTheme();
 }

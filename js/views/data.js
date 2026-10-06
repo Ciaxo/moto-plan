@@ -1,4 +1,4 @@
-import { exportBackup } from '../backup.js';
+import { exportBackup, importFile } from '../backup.js';
 import { backupAge, needsBackup } from '../lib/backup.js';
 import { localDate } from '../lib/dates.js';
 import { nouns, plural } from '../lib/format.js';
@@ -36,8 +36,18 @@ function backupCard(data) {
   const exportButton = button('Eksportuj do pliku', 'button button-primary', exportBackup);
   exportButton.prepend(icon('download'));
   exportButton.dataset.id = 'export';
+  const importButton = button('Importuj z pliku', 'button button-secondary', importFile);
+  importButton.prepend(icon('upload'));
+  importButton.dataset.id = 'import';
   const card = element('section', 'card');
-  card.append(element('h2', 'card-title', 'Kopia zapasowa'), status, exportButton);
+  card.append(
+    element('h2', 'card-title', 'Kopia zapasowa'),
+    status,
+    exportButton,
+    importButton,
+    element('p', 'backup-note', 'Jeden plik ze wszystkimi danymi. '
+      + 'Import łączy wpisy i pyta, zanim coś nadpisze.'),
+  );
   return card;
 }
 

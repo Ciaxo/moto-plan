@@ -178,6 +178,11 @@
   font-weight: var(--fw-semibold);
 }
 
+.backup-note {
+  color: var(--ink-2);
+  font-size: var(--fs-14);
+}
+
 .privacy {
   flex-direction: row;
   align-items: flex-start;

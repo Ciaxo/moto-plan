@@ -56,6 +56,16 @@ export async function remove(store, id) {
   return save(store, { ...record, deleted: true });
 }
 
+// Unlike saveAll, keeps the dates from the backup file, because they decide later merges.
+export async function restoreAll(changes) {
+  const transaction = db.transaction(STORES, 'readwrite');
+  for (const { store, record } of changes) {
+    transaction.objectStore(store).put(record);
+  }
+  await transactionDone(transaction);
+  window.dispatchEvent(new Event('datachange'));
+}
+
 function requestDone(request) {
   return new Promise((resolve, reject) => {
     request.onsuccess = () => resolve(request.result);
