@@ -1,4 +1,4 @@
-import { backupAge, needsBackup } from '../js/lib/backup.js';
+import { backupAge, mergeBackup, needsBackup, validateBackup } from '../js/lib/backup.js';
 import { daysBetween, formatDate, localDate } from '../js/lib/dates.js';
 import { formatAmount, plural } from '../js/lib/format.js';
 import { editRecord, mergePack, validatePack } from '../js/lib/pack.js';
@@ -461,6 +461,136 @@ test('kopia: wpis z datą równą kopii i sam zapis lastExportAt nie przypominaj
   assertEqual(
     [needsBackup(backupData(eightDaysAgo, eightDaysAgo), today), needsBackup(ownRecord, today)],
     [false, false],
+  );
+});
+
+const oldDate = '2026-10-01T12:00:00.000Z';
+const newDate = '2026-10-03T12:00:00.000Z';
+const damagedBackup = ['Plik kopii jest uszkodzony.'];
+
+function saved(id, updatedAt, fields = {}) {
+  return { id, createdAt: oldDate, updatedAt, deleted: false, ...fields };
+}
+
+function backupFile(stores = {}) {
+  return {
+    app: 'moto-plan',
+    type: 'backup',
+    schemaVersion: 1,
+    exportedAt: newDate,
+    data: { ...emptyData(), ...stores },
+  };
+}
+
+function localData(stores) {
+  return { ...emptyData(), ...stores };
+}
+
+test('kopia: poprawny plik nie ma błędów', () => {
+  const file = backupFile({ steps: [saved('k1', newDate)], settings: [saved('theme', newDate)] });
+  assertEqual(validateBackup(file, emptyData()), []);
+});
+
+test('kopia: odrzuca wyższy schemaVersion, a brak schemaVersion uznaje za uszkodzenie', () => {
+  const newer = backupFile();
+  newer.schemaVersion = 99;
+  const missing = backupFile();
+  delete missing.schemaVersion;
+  assertEqual(
+    [validateBackup(newer, emptyData()), validateBackup(missing, emptyData())],
+    [
+      ['Ta kopia pochodzi z nowszej wersji aplikacji. Zaktualizuj aplikację i spróbuj ponownie.'],
+      damagedBackup,
+    ],
+  );
+});
+
+test('kopia: odrzuca daty, które nie są dokładnie datami ISO', () => {
+  const withDate = (updatedAt) => validateBackup(
+    backupFile({ steps: [saved('k1', updatedAt)] }),
+    emptyData(),
+  );
+  const badExport = backupFile();
+  badExport.exportedAt = 'wczoraj';
+  assertEqual(
+    [
+      withDate('zzz'),
+      withDate('2026-10-03'),
+      withDate('2026-10-03T12:00:00Z'),
+      validateBackup(badExport, emptyData()),
+    ],
+    [damagedBackup, damagedBackup, damagedBackup, damagedBackup],
+  );
+});
+
+test('kopia: odrzuca brak magazynu, pusty rekord, rekord bez id i zły deleted', () => {
+  const noStore = backupFile();
+  delete noStore.data.deposits;
+  const noId = backupFile({ steps: [saved('', newDate)] });
+  const badDeleted = backupFile({ steps: [saved('k1', newDate, { deleted: 'nie' })] });
+  const notRecord = backupFile({ steps: [null] });
+  assertEqual(
+    [noStore, noId, badDeleted, notRecord].map((file) => validateBackup(file, emptyData())),
+    [damagedBackup, damagedBackup, damagedBackup, damagedBackup],
+  );
+});
+
+test('kopia: wpis spoza aplikacji jest dodawany, a nowszy z pliku zastępuje lokalny', () => {
+  const file = backupFile({ steps: [saved('k1', newDate, { done: true }), saved('k2', oldDate)] });
+  const data = localData({ steps: [saved('k1', oldDate, { done: false })] });
+  assertEqual(mergeBackup(file, data), {
+    changes: [
+      { store: 'steps', record: saved('k1', newDate, { done: true }) },
+      { store: 'steps', record: saved('k2', oldDate) },
+    ],
+    counts: { added: 1, newer: 1, unchanged: 0 },
+  });
+});
+
+test('kopia: przy równych datach zostaje wpis lokalny', () => {
+  const file = backupFile({ steps: [saved('k1', newDate, { done: true })] });
+  const data = localData({ steps: [saved('k1', newDate, { done: false })] });
+  assertEqual(mergeBackup(file, data), {
+    changes: [],
+    counts: { added: 0, newer: 0, unchanged: 1 },
+  });
+});
+
+test('kopia: nowszy wpis lokalny zostaje i liczy się jako bez zmian', () => {
+  const file = backupFile({ steps: [saved('k1', oldDate, { done: false })] });
+  const data = localData({ steps: [saved('k1', newDate, { done: true })] });
+  assertEqual(mergeBackup(file, data), {
+    changes: [],
+    counts: { added: 0, newer: 0, unchanged: 1 },
+  });
+});
+
+test('kopia: nowsze usunięcie z pliku przechodzi do aplikacji', () => {
+  const file = backupFile({ questions: [saved('q1', newDate, { deleted: true })] });
+  const data = localData({ questions: [saved('q1', oldDate)] });
+  assertEqual(mergeBackup(file, data).changes, [
+    { store: 'questions', record: saved('q1', newDate, { deleted: true }) },
+  ]);
+});
+
+test('kopia: liczniki zgadzają się ze zmianami we wszystkich magazynach', () => {
+  const file = backupFile({
+    stages: [saved('s1', oldDate), saved('s2', oldDate)],
+    steps: [saved('k1', newDate), saved('k2', oldDate), saved('k3', oldDate)],
+    settings: [saved('theme', newDate), saved('lastExportAt', oldDate)],
+  });
+  const data = localData({
+    stages: [saved('s1', oldDate)],
+    steps: [saved('k1', oldDate), saved('k2', newDate)],
+    settings: [saved('theme', oldDate), saved('lastExportAt', newDate)],
+  });
+  const { changes, counts } = mergeBackup(file, data);
+  assertEqual(
+    [counts, changes.map(({ store, record }) => `${store}/${record.id}`)],
+    [
+      { added: 2, newer: 2, unchanged: 3 },
+      ['stages/s2', 'steps/k1', 'steps/k3', 'settings/theme'],
+    ],
   );
 });
 

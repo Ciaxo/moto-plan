@@ -1,4 +1,5 @@
 import { loadAll, save } from './db.js';
+import { SCHEMA_VERSION } from './lib/backup.js';
 import { localDate } from './lib/dates.js';
 import { element } from './ui/elements.js';
 
@@ -10,7 +11,7 @@ export async function exportBackup() {
   const backup = {
     app: 'moto-plan',
     type: 'backup',
-    schemaVersion: 1,
+    schemaVersion: SCHEMA_VERSION,
     exportedAt,
     data: await loadAll(),
   };
