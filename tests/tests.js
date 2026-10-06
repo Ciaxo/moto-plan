@@ -1,4 +1,5 @@
-import { plural } from '../js/lib/format.js';
+import { formatDate, localDate } from '../js/lib/dates.js';
+import { formatAmount, plural } from '../js/lib/format.js';
 import { mergePack, validatePack } from '../js/lib/pack.js';
 import { element, screenHeader } from '../js/ui/elements.js';
 
@@ -55,6 +56,40 @@ test('odmiana w dopełniaczu, po „z" i „około"', () => {
   assertEqual(
     [1, 2, 34].map((count) => plural(count, genitive)),
     ['1 kroku', '2 kroków', '34 kroków'],
+  );
+});
+
+test('kwoty: pełne złote, odstęp także w liczbach czterocyfrowych', () => {
+  assertEqual(
+    [59, 1200, 30000].map((amount) => formatAmount(amount).replaceAll(' ', ' ')),
+    ['59 zł', '1 200 zł', '30 000 zł'],
+  );
+});
+
+const today = '2026-10-05';
+
+test('daty: dzień i miesiąc w bieżącym roku bez roku', () => {
+  assertEqual(
+    [formatDate('2026-11-03', today), formatDate('2026-12', today)],
+    ['3 listopada', 'grudzień'],
+  );
+});
+
+test('daty: dzień i miesiąc w innym roku z rokiem', () => {
+  assertEqual(
+    [formatDate('2027-02-12', today), formatDate('2027-05', today)],
+    ['12 lutego 2027', 'maj 2027'],
+  );
+});
+
+test('daty: sam rok i pusty termin bez zmian', () => {
+  assertEqual([formatDate('2027', today), formatDate('', today)], ['2027', '']);
+});
+
+test('daty: data lokalna, a nie UTC', () => {
+  assertEqual(
+    [localDate(new Date(2026, 0, 1, 0, 15)), localDate(new Date(2026, 9, 5, 23, 45))],
+    ['2026-01-01', '2026-10-05'],
   );
 });
 
