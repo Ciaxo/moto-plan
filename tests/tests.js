@@ -1,6 +1,7 @@
 import { formatDate, localDate } from '../js/lib/dates.js';
 import { formatAmount, plural } from '../js/lib/format.js';
 import { mergePack, validatePack } from '../js/lib/pack.js';
+import { currentStage, isClosed, nextSteps, planStages, progress } from '../js/lib/plan.js';
 import { element, screenHeader } from '../js/ui/elements.js';
 
 const results = [];
@@ -91,6 +92,89 @@ test('daty: data lokalna, a nie UTC', () => {
     [localDate(new Date(2026, 0, 1, 0, 15)), localDate(new Date(2026, 9, 5, 23, 45))],
     ['2026-01-01', '2026-10-05'],
   );
+});
+
+const createdAt = '2026-10-01T10:00:00.000Z';
+
+function stage(id, order, fields = {}) {
+  return { id, order, createdAt, deleted: false, ...fields };
+}
+
+function step(id, stageId, order, fields = {}) {
+  return { id, stageId, order, dueDate: '', done: false, createdAt, deleted: false, ...fields };
+}
+
+function doneSteps(done, total) {
+  return Array.from({ length: total }, (_, index) => ({ done: index < done }));
+}
+
+function ids(records) {
+  return records.map((record) => record.id);
+}
+
+test('plan: postęp zaokrąglony w dół, 100% dopiero gdy wszystko zrobione', () => {
+  const results = [[2, 3], [29, 100], [199, 200], [5, 5], [0, 0]]
+    .map(([done, total]) => progress(doneSteps(done, total)));
+  assertEqual(results, [66, 29, 99, 100, 0]);
+});
+
+test('plan: etap zamknięty, gdy ma kroki i wszystkie są zrobione', () => {
+  assertEqual(
+    [isClosed([]), isClosed(doneSteps(2, 3)), isClosed(doneSteps(3, 3))],
+    [false, false, true],
+  );
+});
+
+test('plan: etapy i kroki według order, a przy równym według createdAt, bez usuniętych', () => {
+  const plan = planStages(
+    [
+      stage('c', 2, { createdAt: '2026-10-02T10:00:00.000Z' }),
+      stage('b', 2),
+      stage('a', 1),
+      stage('x', 1, { deleted: true }),
+    ],
+    [
+      step('k2', 'a', 2),
+      step('k1', 'a', 1),
+      step('k3', 'a', 3, { deleted: true }),
+      step('m1', 'b', 1),
+    ],
+  );
+  assertEqual(
+    plan.map((entry) => [entry.stage.id, ids(entry.steps)]),
+    [['a', ['k1', 'k2']], ['b', ['m1']], ['c', []]],
+  );
+});
+
+test('plan: bieżący etap to pierwszy niezamknięty, a gdy wszystkie są zamknięte, ostatni', () => {
+  const stages = [stage('a', 1), stage('b', 2), stage('c', 3)];
+  const current = (stepList) => currentStage(planStages(stages, stepList)).stage.id;
+  const closedA = step('k1', 'a', 1, { done: true });
+  const closedB = step('m1', 'b', 1, { done: true });
+  assertEqual(
+    [
+      current([step('k1', 'a', 1), step('m1', 'b', 1)]),
+      current([closedA, step('m1', 'b', 1)]),
+      current([closedA, closedB]),
+      current([closedA, closedB, step('n1', 'c', 1, { done: true })]),
+    ],
+    ['a', 'b', 'c', 'c'],
+  );
+});
+
+test('plan: najbliższe kroki według końca terminu, potem etapu i kroku', () => {
+  const stages = [stage('a', 1), stage('b', 2)];
+  const stepList = [
+    step('rok', 'a', 1, { dueDate: '2027' }),
+    step('luty-a', 'a', 2, { dueDate: '2027-02' }),
+    step('bez', 'a', 3),
+    step('zrobiony', 'a', 4, { dueDate: '2026-11', done: true }),
+    step('dzien', 'b', 1, { dueDate: '2027-02-12' }),
+    step('luty-b', 'b', 2, { dueDate: '2027-02' }),
+  ];
+  assertEqual(ids(nextSteps(planStages(stages, stepList))), ['dzien', 'luty-a', 'luty-b']);
+  const undated = [step('bez', 'a', 1), step('rok', 'a', 2, { dueDate: '2027' })];
+  assertEqual(ids(nextSteps(planStages(stages, undated))), ['rok', 'bez']);
 });
 
 function emptyData() {
