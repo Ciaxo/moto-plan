@@ -1,30 +1,42 @@
-import { save } from '../db.js';
+import { saveAll } from '../db.js';
 import { nextOrder, ordered } from '../lib/order.js';
 import { editRecord } from '../lib/pack.js';
 import { button, element, field, select } from '../ui/elements.js';
 import { closeSheet, openSheet } from '../ui/sheet.js';
 
 const answerHint = 'Pusta linia zaczyna nowy akapit, a linia od „- " punkt listy.';
+// No record has an empty id, so this option cannot be mistaken for a category.
+const NEW_CATEGORY = '';
 const emptyQuestion = { question: '', answer: '', sourceTitle: '', sourceUrl: '' };
-const newQuestion = {
-  origin: 'user',
-  packId: null,
-  userModified: false,
-  known: false,
-  knownAt: null,
-  notes: '',
-  notesAt: null,
-};
+const ownRecord = { origin: 'user', packId: null, userModified: false };
+const newQuestion = { ...ownRecord, known: false, knownAt: null, notes: '', notesAt: null };
 
 export function openQuestionSheet(data, { question, categoryId }) {
   const categories = ordered(data.categories);
-  const values = question ?? { ...emptyQuestion, categoryId: categoryId || categories[0]?.id };
+  const values = question ?? {
+    ...emptyQuestion,
+    categoryId: categoryId || categories[0]?.id || NEW_CATEGORY,
+  };
   const category = select(
     'category',
-    categories.map((record) => [record.id, record.title]),
+    [...categories.map((record) => [record.id, record.title]), [NEW_CATEGORY, 'Nowa kategoria…']],
     values.categoryId,
   );
-  category.querySelector('select').required = true;
+  const categoryField = field('Kategoria', category);
+  const categoryName = field('Nazwa kategorii', Object.assign(element('input', 'input'), {
+    name: 'categoryTitle',
+    required: true,
+    pattern: '.*\\S.*',
+  }));
+  // Out of the form while hidden, so its required attribute does not block saving.
+  const showCategoryName = () => {
+    if (form.elements.category.value === NEW_CATEGORY) {
+      categoryField.after(categoryName);
+    } else {
+      categoryName.remove();
+    }
+  };
+  category.addEventListener('change', showCategoryName);
   const text = Object.assign(element('input', 'input'), {
     name: 'question',
     required: true,
@@ -53,7 +65,7 @@ export function openQuestionSheet(data, { question, categoryId }) {
   submit.type = 'submit';
   const form = element('form', 'form');
   form.append(
-    field('Kategoria', category),
+    categoryField,
     field('Pytanie', text),
     answerField,
     field('Tytuł źródła', sourceTitle),
@@ -61,6 +73,7 @@ export function openQuestionSheet(data, { question, categoryId }) {
     submit,
     button('Anuluj', 'button', closeSheet),
   );
+  showCategoryName();
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     submit.disabled = true;
@@ -73,6 +86,7 @@ export function openQuestionSheet(data, { question, categoryId }) {
 function formValues(fields) {
   return {
     categoryId: fields.category.value,
+    categoryTitle: fields.categoryTitle?.value,
     question: fields.question.value,
     answer: fields.answer.value,
     sourceTitle: fields.sourceTitle.value,
@@ -80,7 +94,14 @@ function formValues(fields) {
   };
 }
 
-async function saveQuestion(data, question, changes) {
+async function saveQuestion(data, question, { categoryTitle, ...changes }) {
+  const changed = [];
+  if (changes.categoryId === NEW_CATEGORY) {
+    const order = nextOrder(ordered(data.categories));
+    const category = { ...ownRecord, id: crypto.randomUUID(), order, title: categoryTitle };
+    changed.push({ store: 'categories', record: category });
+    changes.categoryId = category.id;
+  }
   const { categoryId } = changes;
   const inCategory = ordered(data.questions).filter((record) => record.categoryId === categoryId);
   const order = categoryId === question?.categoryId ? question.order : nextOrder(inCategory);
@@ -88,6 +109,10 @@ async function saveQuestion(data, question, changes) {
     ? editRecord('questions', question, { ...changes, order })
     : { ...newQuestion, ...changes, order, id: crypto.randomUUID() };
   if (record) {
-    await save('questions', record);
+    changed.push({ store: 'questions', record });
+  }
+  // One transaction: a new category is never saved without its question.
+  if (changed.length > 0) {
+    await saveAll(changed);
   }
 }
