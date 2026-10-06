@@ -4,13 +4,15 @@ import { mergeBackup, SCHEMA_VERSION, validateBackup } from './lib/backup.js';
 import { formatDate, localDate } from './lib/dates.js';
 import { loadTheme } from './theme.js';
 import { button, element } from './ui/elements.js';
-import { closeSheet, openErrors, openSheet } from './ui/sheet.js';
+import { closeSheet, openConfirm, openErrors, openSheet } from './ui/sheet.js';
 
 const fileTitle = 'Nie można wczytać pliku';
 const readError = 'Nie udało się odczytać pliku.';
 const unknownFile = 'Ten plik nie jest kopią zapasową ani paczką treści Moto Plan.';
 const backupTitle = 'Nie można wczytać kopii';
 const saveError = 'Nie udało się wczytać kopii. Dane w aplikacji się nie zmieniły.';
+const replaceText = 'Dane w aplikacji zostaną zastąpione danymi z kopii. '
+  + 'Jeśli nie masz ich w innej kopii, anuluj i najpierw je wyeksportuj.';
 
 export async function exportBackup() {
   const now = new Date();
@@ -80,21 +82,29 @@ async function importBackup(backup) {
   const date = formatDate(localDate(new Date(backup.exportedAt)), localDate(new Date()));
   const merge = button('Połącz', 'button button-primary', () => {
     merge.disabled = true;
-    restore(changes);
+    restore(changes, false);
+  });
+  const records = Object.keys(data)
+    .flatMap((store) => backup.data[store].map((record) => ({ store, record })));
+  const replace = button('Zastąp wszystko', 'button button-secondary', () => {
+    openConfirm('Zastąpić wszystko?', replaceText, 'Zastąp wszystko', () => {
+      restore(records, true);
+    });
   });
   const body = document.createDocumentFragment();
   body.append(
     element('p', null, `Kopia z ${date}`),
     countList(counts),
     merge,
+    replace,
     button('Anuluj', 'button', closeSheet),
   );
   openSheet('Wczytać kopię?', body);
 }
 
-async function restore(changes) {
+async function restore(changes, replace) {
   try {
-    await restoreAll(changes);
+    await restoreAll(changes, replace);
   } catch {
     openErrors(backupTitle, [saveError]);
     return;
