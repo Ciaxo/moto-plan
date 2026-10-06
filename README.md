@@ -15,7 +15,7 @@ Early development.
 - [x] Local database and content packs
 - [x] Plan screen
 - [x] Backup export and import
-- [ ] Knowledge base
+- [x] Knowledge base
 - [ ] Budget
 - [ ] Start screen
 - [ ] Desktop layout
@@ -42,7 +42,7 @@ Open `http://localhost:8000`.
 
 ## Content packs
 
-The app starts empty. Its content (stages, steps, questions, goals and costs) comes from a JSON file called a content pack. On first start the app offers to load a pack from a file, to load the bundled example pack or to start with an empty plan. Later you load packs with the import button on the Data screen, the same one that restores backups (see [Backups](#backups)). Stages and steps can also be added, edited and deleted in the app.
+The app starts empty. Its content (stages, steps, questions, goals and costs) comes from a JSON file called a content pack. On first start the app offers to load a pack from a file, to load the bundled example pack or to start with an empty plan. Later you load packs with the import button on the Data screen, the same one that restores backups (see [Backups](#backups)). Stages, steps and questions can also be added, edited and deleted in the app, and a new category can be created while adding a question.
 
 A minimal pack:
 
@@ -92,7 +92,7 @@ Every collection below is optional, so a pack can hold only questions, for examp
 - Dates are empty or written as `YYYY`, `YYYY-MM` or `YYYY-MM-DD`.
 - `group` is `once`, `yearly` or `hidden`.
 - `stageId`, `categoryId` and `goalId` must point to a record in the same pack or one already in the app.
-- `answer` is plain text. A blank line starts a new paragraph. Lines starting with `- ` form a list.
+- `answer` is plain text. A blank line starts a new paragraph. Lines starting with `- ` form a list. Any other line break is kept as a line break within the paragraph.
 - `sourceUrl` is shown as a link only when it starts with `https://`. Any other address is kept, but shown without a link.
 - Other fields are ignored, including fields starting with `_` and progress fields such as `done`.
 
@@ -105,6 +105,14 @@ Keep `packId` and record ids stable and raise `version`. Before saving, the app 
 Loading the same version again changes nothing. A version older than the one already loaded is rejected. A pack with a different `packId` is added next to the content you already have.
 
 A pack is data only. Its text is shown as plain text. Packs never contain deposits or settings.
+
+## Knowledge base
+
+Questions and answers are grouped in categories. The list can be narrowed to one category and searched as you type. The search looks in the question, the answer and your notes, and ignores letter case and Polish diacritics, so `lancuch` finds "łańcuch".
+
+Each question has a status, *don't know* or *know*, and a notes field that saves itself a moment after you stop typing. Notes and status count as your progress: a newer version of the pack still updates a question you have only taken notes on. Editing the question itself in the app keeps it as you wrote it.
+
+A source link opens in a new tab. It is the only link that leads outside the app.
 
 ## Backups
 
