@@ -69,19 +69,8 @@
   background: var(--line);
 }
 
-.stage-card {
-  display: block;
-  padding: 0;
-}
-
-.stage-summary {
+.stage .fold-summary {
   position: relative;
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  min-height: var(--row-min);
-  padding: var(--sp-2) var(--sp-4);
-  border-radius: var(--r-xl);
 }
 
 .stage-marker {
@@ -126,15 +115,6 @@
 
 .stage[aria-current="step"] .stage-count {
   color: var(--accent);
-}
-
-.stage-chevron {
-  color: var(--ink-2);
-  transition: rotate var(--dur-fast) var(--ease);
-}
-
-.stage-card[open] .stage-chevron {
-  rotate: 180deg;
 }
 
 .stage-body {

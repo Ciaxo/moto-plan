@@ -298,6 +298,29 @@
   color: var(--on-accent);
 }
 
+.fold {
+  display: block;
+  padding: 0;
+}
+
+.fold-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: var(--row-min);
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--r-xl);
+}
+
+.fold-chevron {
+  color: var(--ink-2);
+  transition: rotate var(--dur-fast) var(--ease);
+}
+
+.fold[open] .fold-chevron {
+  rotate: 180deg;
+}
+
 .list {
   gap: 0;
   margin: 0;

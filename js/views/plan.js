@@ -64,7 +64,7 @@ function editStep(plan, steps, target) {
 
 function stageItem(entry, number, isCurrent, context) {
   const { stage, steps } = entry;
-  const card = element('details', 'card stage-card');
+  const card = element('details', 'card fold');
   card.open = expanded.has(stage.id);
   card.addEventListener('toggle', () => {
     if (card.open) {
@@ -92,8 +92,8 @@ function stageSummary(stage, steps, number) {
     heading.append(element('span', 'row-meta', stage.period));
   }
   const chevron = icon('chevron-down');
-  chevron.classList.add('stage-chevron');
-  const summary = element('summary', 'stage-summary');
+  chevron.classList.add('fold-chevron');
+  const summary = element('summary', 'fold-summary');
   summary.dataset.id = `stage-${stage.id}`;
   summary.append(
     marker,
