@@ -63,6 +63,11 @@ function summary(pack, installed, { changes, counts }) {
   }
   const confirm = button(otherPack ? 'Dodaj' : 'Wczytaj', 'button button-primary', () => {
     confirm.disabled = true;
+    // A new importedAt alone would raise updatedAt of the pack list, like a rewritten record.
+    if (sameVersion && changes.length === 0) {
+      closeSheet();
+      return;
+    }
     save(pack, installed, changes);
   });
   body.append(confirm, button('Anuluj', 'button', closeSheet));
