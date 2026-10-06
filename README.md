@@ -16,7 +16,7 @@ Early development.
 - [x] Plan screen
 - [x] Backup export and import
 - [x] Knowledge base
-- [ ] Budget
+- [x] Budget
 - [ ] Start screen
 - [ ] Desktop layout
 - [ ] Installable, works offline
@@ -42,7 +42,7 @@ Open `http://localhost:8000`.
 
 ## Content packs
 
-The app starts empty. Its content (stages, steps, questions, goals and costs) comes from a JSON file called a content pack. On first start the app offers to load a pack from a file, to load the bundled example pack or to start with an empty plan. Later you load packs with the import button on the Data screen, the same one that restores backups (see [Backups](#backups)). Stages, steps and questions can also be added, edited and deleted in the app, and a new category can be created while adding a question.
+The app starts empty. Its content (stages, steps, questions, goals and costs) comes from a JSON file called a content pack. On first start the app offers to load a pack from a file, to load the bundled example pack or to start with an empty plan. Later you load packs with the import button on the Data screen, the same one that restores backups (see [Backups](#backups)). Stages, steps, questions and costs can also be added, edited and deleted in the app, and a new category can be created while adding a question. Goals are not edited in the app (see [Budget](#budget)).
 
 A minimal pack:
 
@@ -113,6 +113,23 @@ Questions and answers are grouped in categories. The list can be narrowed to one
 Each question has a status, *don't know* or *know*, and a notes field that saves itself a moment after you stop typing. Notes and status count as your progress: a newer version of the pack still updates a question you have only taken notes on. Editing the question itself in the app keeps it as you wrote it.
 
 A source link opens in a new tab. It is the only link that leads outside the app.
+
+## Budget
+
+The Budget screen compares the costs with the money you have put aside. All amounts are whole złoty.
+
+- Every cost counts towards the total, whatever its kind: one-off, yearly or hidden (*Jednorazowe*, *Roczne*, *Ukryte i rezerwa*). A cost is either planned or paid.
+- Collected (*Zebrane*) is the sum of all deposits. On account (*Na koncie*) is collected minus the paid costs and can be negative. Missing (*Brakuje*) is the total minus collected, never below zero.
+- With a monthly deposit set, the app estimates the purchase month: the month in which the missing amount is covered, counting a started month as a whole one. A monthly deposit of 0 means no estimate.
+
+Costs belong to goals, which come from the content pack. When you add the first cost and there is no goal yet, the app creates one called *Mój cel*.
+
+With two or more goals you can switch between one goal (*Jeden cel*) and separate goals (*Osobne cele*). The switch changes only the view: amounts and assignments stay as they are. In the separate view each goal shows its value, the sum of its costs, and how much of the deposits it has received:
+
+1. A deposit can be assigned to a goal. It counts only for that goal, even above the goal's value.
+2. Deposits without a goal are shared out in goal order. Each goal takes what it still needs, and the last goal takes whatever is left.
+
+Money assigned above a goal's value stays with that goal, so the last goal card shows what the whole budget is missing and the estimated purchase month.
 
 ## Backups
 
