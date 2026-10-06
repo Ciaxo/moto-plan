@@ -2,7 +2,7 @@ import { loadAll, saveAll } from './db.js';
 import { nouns, plural } from './lib/format.js';
 import { installedPacks, mergePack, validatePack } from './lib/pack.js';
 import { button, element } from './ui/elements.js';
-import { closeSheet, openSheet } from './ui/sheet.js';
+import { closeSheet, openErrors, openSheet } from './ui/sheet.js';
 
 const countForms = [
   ['added', ['nowy wpis', 'nowe wpisy', 'nowych wpisów']],
@@ -19,6 +19,7 @@ const sameVersionNote = 'Ta wersja paczki jest już wczytana. '
   + 'Ponowne wczytanie niczego nie podwoi.';
 const otherPackNote = 'W aplikacji jest już treść z innej paczki. '
   + 'Nowa treść zostanie dodana obok obecnej.';
+const errorTitle = 'Nie można wczytać paczki';
 const exampleError = 'Nie udało się pobrać przykładowej paczki.';
 const saveError = 'Nie udało się zapisać paczki. Dane w aplikacji się nie zmieniły.';
 
@@ -28,7 +29,7 @@ export async function loadExample() {
     const response = await fetch('./data/example-pack.json');
     pack = await response.json();
   } catch {
-    showErrors([exampleError]);
+    openErrors(errorTitle, [exampleError]);
     return;
   }
   await importPack(pack);
@@ -38,7 +39,7 @@ export async function importPack(pack) {
   const data = await loadAll();
   const errors = validatePack(pack, data);
   if (errors.length > 0) {
-    showErrors(errors);
+    openErrors(errorTitle, errors);
     return;
   }
   openSheet('Wczytać paczkę?', summary(pack, installedPacks(data), mergePack(pack, data)));
@@ -108,16 +109,6 @@ async function save(pack, installed, changes) {
     await saveAll([...changes, { store: 'settings', record: { id: 'packs', value: packs } }]);
     closeSheet();
   } catch {
-    showErrors([saveError]);
+    openErrors(errorTitle, [saveError]);
   }
-}
-
-function showErrors(errors) {
-  const list = element('ul');
-  for (const error of errors) {
-    list.append(element('li', null, error));
-  }
-  const body = document.createDocumentFragment();
-  body.append(list, button('Zamknij', 'button button-secondary', closeSheet));
-  openSheet('Nie można wczytać paczki', body);
 }

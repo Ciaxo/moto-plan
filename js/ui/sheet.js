@@ -29,3 +29,13 @@ export function openConfirm(heading, text, label, onConfirm) {
   openSheet(heading, body);
   cancel.focus();
 }
+
+export function openErrors(heading, errors) {
+  const list = element('ul');
+  for (const error of errors) {
+    list.append(element('li', null, error));
+  }
+  const body = document.createDocumentFragment();
+  body.append(list, button('Zamknij', 'button button-secondary', closeSheet));
+  openSheet(heading, body);
+}
