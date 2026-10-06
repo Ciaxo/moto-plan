@@ -86,7 +86,7 @@ export function validatePack(pack, data) {
   return errors;
 }
 
-function installedPacks(data) {
+export function installedPacks(data) {
   return data.settings.find((record) => record.id === 'packs')?.value ?? {};
 }
 

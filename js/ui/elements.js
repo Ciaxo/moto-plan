@@ -11,6 +11,13 @@ export function element(tag, className, text) {
   return node;
 }
 
+export function button(label, className, onClick) {
+  const node = element('button', className, label);
+  node.type = 'button';
+  node.addEventListener('click', onClick);
+  return node;
+}
+
 export function screenHeader(title, { eyebrow, action } = {}) {
   const header = element('header', 'screen-header');
   if (eyebrow) {

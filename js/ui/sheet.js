@@ -7,7 +7,9 @@ sheet.querySelector('.sheet-close').addEventListener('click', closeSheet);
 export function openSheet(heading, body) {
   title.textContent = heading;
   content.replaceChildren(body);
-  sheet.showModal();
+  if (!sheet.open) {
+    sheet.showModal();
+  }
 }
 
 export function closeSheet() {
