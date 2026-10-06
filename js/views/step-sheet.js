@@ -75,6 +75,9 @@ function confirmRemove(step) {
     confirm.disabled = true;
     await remove('steps', step.id);
     closeSheet();
+    // The row is gone after the redraw, so focus moves to a button that stays in the stage.
+    const addStep = CSS.escape(`add-step-${step.stageId}`);
+    document.querySelector(`[data-id="${addStep}"]`).focus();
   });
   const cancel = button('Anuluj', 'button', closeSheet);
   const body = document.createDocumentFragment();
