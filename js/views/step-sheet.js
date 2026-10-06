@@ -1,4 +1,4 @@
-import { save } from '../db.js';
+import { remove, save } from '../db.js';
 import { editRecord } from '../lib/pack.js';
 import { nextOrder } from '../lib/plan.js';
 import { button, element, field, icon } from '../ui/elements.js';
@@ -58,6 +58,9 @@ export function openStepSheet(plan, { step, stageId }) {
     submit,
     button('Anuluj', 'button', closeSheet),
   );
+  if (step) {
+    form.append(button('Usuń krok', 'button button-secondary', () => confirmRemove(step)));
+  }
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
     submit.disabled = true;
@@ -65,6 +68,19 @@ export function openStepSheet(plan, { step, stageId }) {
     closeSheet();
   });
   openSheet(step ? 'Edytuj krok' : 'Nowy krok', form);
+}
+
+function confirmRemove(step) {
+  const confirm = button('Usuń krok', 'button button-primary', async () => {
+    confirm.disabled = true;
+    await remove('steps', step.id);
+    closeSheet();
+  });
+  const cancel = button('Anuluj', 'button', closeSheet);
+  const body = document.createDocumentFragment();
+  body.append(element('p', null, `Krok „${step.title}" zniknie z planu.`), confirm, cancel);
+  openSheet('Usunąć krok?', body);
+  cancel.focus();
 }
 
 function stageSelect(plan, stageId) {
