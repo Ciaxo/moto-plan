@@ -1,3 +1,4 @@
+import { importFile } from '../backup.js';
 import { loadExample } from '../content.js';
 import { needsBackup } from '../lib/backup.js';
 import { localDate } from '../lib/dates.js';
@@ -36,6 +37,7 @@ function welcomeCard() {
     element('h2', 'card-title', 'Zacznij od treści'),
     element('p', null, 'Aplikacja jest pusta. Plan, pytania i koszty wczytasz z paczki treści '
       + 'albo dodasz sam.'),
+    button('Wczytaj paczkę z pliku', 'button button-primary', importFile),
     button('Zobacz przykład', 'button button-secondary', loadExample),
     scratch,
   );
