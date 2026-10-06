@@ -149,8 +149,22 @@
 }
 
 .stage-body > .progress,
-.stage-body > .button-add {
+.stage-actions {
   margin-inline: var(--sp-4);
+}
+
+.stage-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+.stage-actions > .button {
+  flex: 1 1 auto;
+}
+
+.timeline + .button-add {
+  margin-left: calc(var(--marker) + var(--sp-3));
 }
 
 .stage .row:has(:checked) .row-title {
