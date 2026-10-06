@@ -3,7 +3,7 @@ import {
   budgetSettings, budgetTotals, currentGoal, depositsByDate, forecast, goalFunding,
 } from '../js/lib/budget.js';
 import { addMonths, daysBetween, formatDate, formatMonth, localDate } from '../js/lib/dates.js';
-import { formatAmount, plural } from '../js/lib/format.js';
+import { formatAmount, plural, pluralForm } from '../js/lib/format.js';
 import { nextOrder } from '../js/lib/order.js';
 import { editRecord, mergePack, validatePack } from '../js/lib/pack.js';
 import {
@@ -66,6 +66,14 @@ test('odmiana w dopełniaczu, po „z" i „około"', () => {
   assertEqual(
     [1, 2, 34].map((count) => plural(count, genitive)),
     ['1 kroku', '2 kroków', '34 kroków'],
+  );
+});
+
+test('odmiana: sama forma, bez liczby, dla przymiotnika po rzeczowniku', () => {
+  const closed = ['zamknięty', 'zamknięte', 'zamkniętych'];
+  assertEqual(
+    [0, 1, 2, 5, 22].map((count) => pluralForm(count, closed)),
+    ['zamkniętych', 'zamknięty', 'zamknięte', 'zamkniętych', 'zamknięte'],
   );
 });
 

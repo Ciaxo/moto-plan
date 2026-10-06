@@ -16,8 +16,11 @@ const amounts = new Intl.NumberFormat('pl-PL', {
 });
 
 export function plural(count, forms) {
-  const form = forms[formIndex[pluralRules.select(count)]];
-  return `${numbers.format(count)} ${form}`;
+  return `${numbers.format(count)} ${pluralForm(count, forms)}`;
+}
+
+export function pluralForm(count, forms) {
+  return forms[formIndex[pluralRules.select(count)]];
 }
 
 export function formatAmount(amount) {
