@@ -1,9 +1,13 @@
 import { save } from '../db.js';
-import { budgetSettings, budgetTotals, depositsByDate, forecast } from '../lib/budget.js';
+import {
+  budgetSettings, budgetTotals, currentGoal, depositsByDate, forecast, goalFunding,
+} from '../lib/budget.js';
 import { formatDate, formatMonth, localDate } from '../lib/dates.js';
 import { formatAmount, plural } from '../lib/format.js';
 import { ordered } from '../lib/order.js';
-import { addButton, button, checkbox, element, icon, screenHeader } from '../ui/elements.js';
+import {
+  addButton, button, checkbox, element, icon, screenHeader, segmented,
+} from '../ui/elements.js';
 import { openCostSheet } from './cost-sheet.js';
 import { openDepositSheet, openMonthlySheet } from './deposit-sheet.js';
 
@@ -12,43 +16,75 @@ const groups = [
   ['yearly', 'Roczne'],
   ['hidden', 'Ukryte i rezerwa'],
 ];
+const modes = [['single', 'Jeden cel'], ['split', 'Osobne cele']];
 const depositForms = ['wpłata', 'wpłaty', 'wpłat'];
+const itemForms = ['pozycja', 'pozycje', 'pozycji'];
 const expanded = new Set();
+let lastGoalId;
 
 export function renderBudget(data, entered) {
+  const today = localDate(new Date());
+  const { goalMode, monthlyDeposit } = budgetSettings(data.settings);
+  const goals = ordered(data.goals);
+  const split = goals.length > 1 && goalMode === 'split';
+  const funding = goalFunding(data.goals, data.costs, data.deposits);
+  expandCurrent(currentGoal(funding), entered);
+  const totals = budgetTotals(data.costs, data.deposits);
+  const purchase = forecast(totals, monthlyDeposit, today);
+  const deposits = depositsByDate(data.deposits);
+  // In the single goal mode no goal is shown anywhere, so deposits do not show theirs either.
+  const context = { data, today, goals: split ? goals : [] };
+  const addDeposit = () => openDepositSheet(context.goals);
+  const screen = document.createDocumentFragment();
+  screen.append(screenHeader('Budżet', { eyebrow: forecastText(purchase) }));
+  if (goals.length > 1) {
+    screen.append(modeSwitch(goalMode));
+  }
+  if (deposits.length === 0) {
+    screen.append(starterCard(addDeposit));
+  }
+  if (split) {
+    screen.append(...goalCards(funding, totals, purchase, context));
+  } else {
+    screen.append(summaryCard(totals));
+  }
+  screen.append(monthlyCard(monthlyDeposit));
+  if (deposits.length > 0) {
+    screen.append(
+      depositGroup(deposits, context),
+      addButton('Dodaj wpłatę', 'add-deposit', addDeposit),
+    );
+  }
+  if (!split) {
+    screen.append(...costGroups(ordered(data.costs), context));
+  }
+  screen.append(addButton('Dodaj koszt', 'add-cost', () => openCostSheet(data)));
+  return screen;
+}
+
+function expandCurrent(current, entered) {
   if (entered) {
     expanded.clear();
     expanded.add('costs-once');
   }
-  const today = localDate(new Date());
-  const { monthlyDeposit } = budgetSettings(data.settings);
-  const totals = budgetTotals(data.costs, data.deposits);
-  const costs = ordered(data.costs);
-  const deposits = depositsByDate(data.deposits);
-  const context = { data, today };
-  const addDeposit = () => openDepositSheet();
-  const eyebrow = forecastText(forecast(totals, monthlyDeposit, today));
-  const screen = document.createDocumentFragment();
-  screen.append(screenHeader('Budżet', { eyebrow }));
-  if (deposits.length === 0) {
-    screen.append(starterCard(addDeposit));
+  const id = current?.goal.id;
+  if (id && (entered || id !== lastGoalId)) {
+    expanded.add(`goal-${id}`);
   }
-  screen.append(summaryCard(totals), monthlyCard(monthlyDeposit));
-  if (deposits.length > 0) {
-    screen.append(
-      depositGroup(deposits, today),
-      addButton('Dodaj wpłatę', 'add-deposit', addDeposit),
-    );
-  }
-  screen.append(
-    ...costGroups(costs, context),
-    addButton('Dodaj koszt', 'add-cost', () => openCostSheet(data)),
-  );
-  return screen;
+  lastGoalId = id;
 }
 
-function forecastText(result) {
-  return result.message ?? `Zakup około: ${formatMonth(result.month)}`;
+function forecastText(purchase) {
+  return purchase.message ?? `Zakup około: ${formatMonth(purchase.month)}`;
+}
+
+function modeSwitch(goalMode) {
+  const options = segmented('goal-mode', modes, goalMode);
+  options.setAttribute('aria-label', 'Tryb budżetu');
+  options.addEventListener('change', (event) => {
+    save('settings', { id: 'goalMode', value: event.target.value });
+  });
+  return options;
 }
 
 // Same data-id as "Dodaj wpłatę", which takes the focus when this card disappears.
@@ -67,23 +103,83 @@ function summaryCard(totals) {
     element('span', 'budget-amount', formatAmount(totals.collected)),
     `z ${formatAmount(totals.total)}`,
   );
-  // The percent, not the amounts: without costs a max of 0 would turn into 1 and fill the bar.
-  const bar = element('progress', 'progress');
-  bar.max = 100;
-  bar.value = totals.percent;
-  bar.setAttribute('aria-label', 'Zebrane');
   const card = element('section', 'card');
   card.append(
     element('p', 'budget-label', 'Zebrane'),
     collected,
-    bar,
+    percentBar(totals.percent, 'Zebrane'),
     figures([
-      ['Na koncie', totals.onAccount],
-      ['Wydane', totals.spent],
-      ['Brakuje', totals.missing],
+      ['Na koncie', formatAmount(totals.onAccount)],
+      ['Wydane', formatAmount(totals.spent)],
+      ['Brakuje', formatAmount(totals.missing)],
     ]),
   );
   return card;
+}
+
+function goalCards(funding, totals, purchase, context) {
+  // A manual deposit above a goal's value stays with that goal, so goals alone can hide what the
+  // whole budget is missing. The last card shows the whole budget.
+  const overall = figures([
+    ['Brakuje', formatAmount(totals.missing)],
+    ['Zakup około', purchase.message ?? formatMonth(purchase.month)],
+  ]);
+  return funding.map((entry, index) => {
+    const last = index === funding.length - 1;
+    return goalCard(entry, index + 1, last ? overall : null, context);
+  });
+}
+
+function goalCard(entry, number, overall, context) {
+  const { goal, costs, value, funded, spent, percent, covered } = entry;
+  const heading = element('div', 'goal-heading');
+  heading.append(
+    element('p', 'card-title', `Cel ${number}`),
+    element('h2', 'goal-title', goal.title),
+  );
+  const head = element('div', 'goal-head');
+  head.append(heading);
+  // A goal without costs has nothing to cover.
+  if (value > 0) {
+    head.append(covered ? coveredBadge() : element('span', 'goal-percent', `${percent}%`));
+  }
+  const amount = element('p', 'budget-collected');
+  const spentText = spent > 0 ? ` · wydane ${formatAmount(spent)}` : '';
+  amount.append(
+    element('span', 'goal-funded', formatAmount(funded)),
+    `z ${formatAmount(value)}${spentText}`,
+  );
+  const card = element('section', 'card');
+  card.append(head, amount, percentBar(percent, goal.title));
+  if (overall) {
+    card.append(overall);
+  }
+  if (costs.length > 0) {
+    card.append(goalCosts(goal, costs, context));
+  }
+  return card;
+}
+
+function coveredBadge() {
+  const badge = element('span', 'goal-badge', 'Pokryty');
+  badge.prepend(icon('check'));
+  return badge;
+}
+
+function goalCosts(goal, costs, context) {
+  const heading = element('span', 'group-title', plural(costs.length, itemForms));
+  const list = foldCard(`goal-${goal.id}`, [heading], costList(costs, context));
+  list.classList.add('goal-costs');
+  return list;
+}
+
+// The percent, not the amounts: without costs a max of 0 would turn into 1 and fill the bar.
+function percentBar(percent, label) {
+  const bar = element('progress', 'progress');
+  bar.max = 100;
+  bar.value = percent;
+  bar.setAttribute('aria-label', label);
+  return bar;
 }
 
 function monthlyCard(monthlyDeposit) {
@@ -99,9 +195,9 @@ function monthlyCard(monthlyDeposit) {
 
 function figures(entries) {
   const list = element('dl', 'figures');
-  for (const [label, amount] of entries) {
+  for (const [label, value] of entries) {
     const item = element('div', 'figure');
-    item.append(element('dt', null, label), element('dd', null, formatAmount(amount)));
+    item.append(element('dt', null, label), element('dd', null, value));
     list.append(item);
   }
   return list;
@@ -126,7 +222,8 @@ function foldCard(id, heading, body) {
   return card;
 }
 
-function depositGroup(deposits, today) {
+function depositGroup(deposits, { goals, today }) {
+  const titles = new Map(goals.map((goal) => [goal.id, goal.title]));
   const last = formatDate(deposits[0].date, today);
   const heading = element('span', 'group-heading');
   heading.append(
@@ -134,29 +231,32 @@ function depositGroup(deposits, today) {
     element('span', 'row-meta', `${plural(deposits.length, depositForms)} · ostatnia ${last}`),
   );
   const list = element('ul', 'list');
-  list.append(...deposits.map((deposit) => depositRow(deposit, today)));
-  list.addEventListener('click', (event) => editDeposit(deposits, event.target));
+  for (const deposit of deposits) {
+    list.append(depositRow(deposit, titles.get(deposit.goalId), today));
+  }
+  list.addEventListener('click', (event) => editDeposit(deposits, goals, event.target));
   return foldCard('deposits', [heading], list);
 }
 
-function depositRow(deposit, today) {
+function depositRow(deposit, goalTitle, today) {
   const main = element('button', 'row-main deposit-main');
   main.type = 'button';
   main.value = deposit.id;
   main.dataset.id = `deposit-${deposit.id}`;
-  main.append(
-    element('span', 'row-title', formatDate(deposit.date, today)),
-    element('span', 'deposit-amount', formatAmount(deposit.amount)),
-  );
+  main.append(element('span', null, formatDate(deposit.date, today)));
+  if (goalTitle) {
+    main.append(element('span', 'row-meta', goalTitle));
+  }
+  main.append(element('span', 'deposit-amount', formatAmount(deposit.amount)));
   const row = element('li', 'row');
   row.append(main);
   return row;
 }
 
-function editDeposit(deposits, target) {
+function editDeposit(deposits, goals, target) {
   const row = target.closest('.row-main');
   if (row) {
-    openDepositSheet(deposits.find((deposit) => deposit.id === row.value));
+    openDepositSheet(goals, deposits.find((deposit) => deposit.id === row.value));
   }
 }
 

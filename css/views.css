@@ -289,12 +289,66 @@
 }
 
 .budget-amount,
+.goal-funded,
+.goal-percent,
 .figure dd,
 .monthly-value,
 .group-sum,
 .cost-amount,
 .deposit-amount {
   font-variant-numeric: tabular-nums;
+}
+
+.goal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+
+.goal-heading {
+  display: grid;
+  gap: var(--sp-1);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.goal-title {
+  font-size: var(--fs-20);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+}
+
+.goal-percent {
+  color: var(--accent);
+  font-size: var(--fs-24);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-tight);
+}
+
+.goal-badge {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-full);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: var(--fw-bold);
+}
+
+.goal-funded {
+  color: var(--ink);
+  font-size: var(--fs-28);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-display);
+  line-height: var(--lh-tight);
+}
+
+.goal-costs {
+  border-radius: var(--r-lg);
+  background: var(--surface-inset);
 }
 
 .figures {

@@ -2,14 +2,17 @@ import { remove, save } from '../db.js';
 import { formatDate, localDate } from '../lib/dates.js';
 import { formatAmount } from '../lib/format.js';
 import { editRecord } from '../lib/pack.js';
-import { button, element, field } from '../ui/elements.js';
+import { button, element, field, select } from '../ui/elements.js';
 import { closeSheet, openConfirm, openSheet } from '../ui/sheet.js';
 
+// No record has an empty id, so this option cannot be mistaken for a goal.
+const AUTOMATIC = '';
 const newDeposit = { origin: 'user', packId: null, userModified: false, goalId: null };
 
-export function openDepositSheet(deposit) {
+// Without goals, as in the single goal mode, there is no goal field and the saved goal stays.
+export function openDepositSheet(goals, deposit) {
   const today = localDate(new Date());
-  const values = deposit ?? { amount: '', date: today, note: '' };
+  const values = deposit ?? { amount: '', date: today, goalId: null, note: '' };
   const amount = Object.assign(element('input', 'input'), {
     type: 'number',
     name: 'amount',
@@ -35,9 +38,12 @@ export function openDepositSheet(deposit) {
   const submit = element('button', 'button button-primary', 'Zapisz wpłatę');
   submit.type = 'submit';
   const form = element('form', 'form');
+  form.append(field('Kwota (zł)', amount), field('Data', date));
+  if (goals.length > 0) {
+    const options = [[AUTOMATIC, 'Automatycznie'], ...goals.map((goal) => [goal.id, goal.title])];
+    form.append(field('Cel', select('goal', options, values.goalId ?? AUTOMATIC)));
+  }
   form.append(
-    field('Kwota (zł)', amount),
-    field('Data', date),
     field('Notatka', note),
     submit,
     button('Anuluj', 'button', closeSheet),
@@ -55,7 +61,15 @@ export function openDepositSheet(deposit) {
 }
 
 function formValues(fields) {
-  return { amount: Number(fields.amount.value), date: fields.date.value, note: fields.note.value };
+  const values = {
+    amount: Number(fields.amount.value),
+    date: fields.date.value,
+    note: fields.note.value,
+  };
+  if (fields.goal) {
+    values.goalId = fields.goal.value === AUTOMATIC ? null : fields.goal.value;
+  }
+  return values;
 }
 
 async function saveDeposit(deposit, changes) {
