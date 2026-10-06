@@ -17,7 +17,7 @@ Early development.
 - [x] Backup export and import
 - [x] Knowledge base
 - [x] Budget
-- [ ] Start screen
+- [x] Start screen
 - [ ] Desktop layout
 - [ ] Installable, works offline
 - [ ] Published on GitHub Pages
@@ -105,6 +105,17 @@ Keep `packId` and record ids stable and raise `version`. Before saving, the app 
 Loading the same version again changes nothing. A version older than the one already loaded is rejected. A pack with a different `packId` is added next to the content you already have.
 
 A pack is data only. Its text is shown as plain text. Packs never contain deposits or settings.
+
+## Start
+
+The Start screen sums up the plan and the budget.
+
+- The current stage is the first one that is not closed. A stage is closed when it has steps and all of them are done. When every stage is closed, the last one is current. The screen title is the stage's `headline`, or its `title` when there is none.
+- The gauge shows the share of done steps, rounded down, so it reaches 100% only when every step is done. The bar below it has one segment per stage.
+- Next steps (*Najbliższe kroki*) lists up to three steps that are not done, the earliest due first. A due date of only a year counts as the end of that year, a month as the end of that month, and steps without a date come last. Steps with the same due date keep their order in the plan. A step can be ticked off right there.
+- The savings card shows the same amounts and purchase estimate as the Budget screen and opens it. It appears once there is at least one cost.
+
+The Motorcycle tab is a preview of a later version. When the purchase month is estimated, it also says how many months are left.
 
 ## Knowledge base
 
