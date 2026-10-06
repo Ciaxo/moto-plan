@@ -17,6 +17,11 @@ export async function setTheme(theme) {
 }
 
 export async function startTheme() {
+  await loadTheme();
+  darkScheme.addEventListener('change', applyTheme);
+}
+
+export async function loadTheme() {
   const record = await getOne('settings', 'theme');
   if (record) {
     current = record.value;
@@ -24,7 +29,6 @@ export async function startTheme() {
   } else {
     localStorage.removeItem(KEY);
   }
-  darkScheme.addEventListener('change', applyTheme);
   applyTheme();
 }
 
