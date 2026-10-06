@@ -20,12 +20,15 @@ function isEmpty(data) {
 }
 
 function welcomeCard() {
+  const scratch = element('a', 'button', 'Zacznij od zera');
+  scratch.href = '#/plan';
   const card = element('section', 'card');
   card.append(
     element('h2', 'card-title', 'Zacznij od treści'),
     element('p', null, 'Aplikacja jest pusta. Plan, pytania i koszty wczytasz z paczki treści '
       + 'albo dodasz sam.'),
     button('Zobacz przykład', 'button button-secondary', loadExample),
+    scratch,
   );
   return card;
 }
