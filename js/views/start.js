@@ -2,23 +2,33 @@ import { importFile } from '../backup.js';
 import { loadExample } from '../content.js';
 import { needsBackup } from '../lib/backup.js';
 import { formatMonth, localDate } from '../lib/dates.js';
-import { currentStage, planStages } from '../lib/plan.js';
-import { button, dot, element, screenHeader, icon } from '../ui/elements.js';
+import { plural, pluralForm } from '../lib/format.js';
+import { countDone, currentStage, isClosed, planStages, progress } from '../lib/plan.js';
+import { SVG_NS, button, dot, element, screenHeader, icon } from '../ui/elements.js';
+import { stepsGenitive } from './plan.js';
+
+const stagesGenitive = ['etapu', 'etapów', 'etapów'];
+const closedForms = ['zamknięty', 'zamknięte', 'zamkniętych'];
+// The gauge is drawn in viewBox units, 208 wide like --gauge: a half circle around (104, 104).
+const gaugeArc = 'M 6 104 A 98 98 0 0 1 202 104';
 
 export function renderStart(data) {
   const today = localDate(new Date());
   const plan = planStages(data.stages, data.steps);
+  const current = currentStage(plan);
   const screen = document.createDocumentFragment();
-  screen.append(header(plan, today, settingsLink(needsBackup(data, today))));
+  screen.append(header(plan, current, today, settingsLink(needsBackup(data, today))));
   if (isEmpty(data)) {
     screen.append(welcomeCard());
+  }
+  if (plan.length > 0) {
+    screen.append(progressCard(plan, current));
   }
   return screen;
 }
 
-function header(plan, today, action) {
+function header(plan, current, today, action) {
   const month = formatMonth(today.slice(0, 7));
-  const current = currentStage(plan);
   if (!current) {
     return screenHeader('Moto Plan', { eyebrow: month, action });
   }
@@ -38,6 +48,80 @@ function settingsLink(warn) {
     settings.append(dot());
   }
   return settings;
+}
+
+function progressCard(plan, current) {
+  const steps = plan.flatMap((entry) => entry.steps);
+  const closed = plan.filter((entry) => isClosed(entry.steps)).length;
+  const caption = `${countDone(steps)} z ${plural(steps.length, stepsGenitive)} · `
+    + `${closed} z ${plural(plan.length, stagesGenitive)} ${pluralForm(closed, closedForms)}`;
+  const card = element('section', 'card progress-card');
+  card.append(
+    gauge(progress(steps)),
+    stageBar(plan, current),
+    element('p', 'progress-caption', caption),
+  );
+  return card;
+}
+
+function gauge(percent) {
+  const drawing = svgElement('svg', { class: 'gauge-drawing', viewBox: '0 0 208 110' });
+  drawing.setAttribute('aria-hidden', 'true');
+  drawing.append(gaugePath('gauge-track'));
+  for (let index = 0; index <= 10; index += 1) {
+    drawing.append(gaugeTick((Math.PI * index) / 10));
+  }
+  // A dash of length 0 with round caps would still show a dot at the start of the arc.
+  if (percent > 0) {
+    const fill = gaugePath('gauge-fill');
+    fill.setAttribute('stroke-dasharray', `${percent} 100`);
+    drawing.append(fill);
+  }
+  const node = element('div', 'gauge');
+  node.append(drawing, element('p', 'gauge-percent', `${percent}%`));
+  return node;
+}
+
+// With pathLength 100 the dash length along the arc is simply the percent.
+function gaugePath(className) {
+  return svgElement('path', {
+    class: className, d: gaugeArc, pathLength: 100, 'stroke-width': 12,
+  });
+}
+
+function gaugeTick(angle) {
+  const [x1, y1] = arcPoint(75, angle);
+  const [x2, y2] = arcPoint(81, angle);
+  return svgElement('line', { class: 'gauge-tick', x1, y1, x2, y2, 'stroke-width': 1.5 });
+}
+
+function arcPoint(radius, angle) {
+  return [104 - radius * Math.cos(angle), 104 - radius * Math.sin(angle)];
+}
+
+function svgElement(tag, attributes) {
+  const node = document.createElementNS(SVG_NS, tag);
+  for (const [name, value] of Object.entries(attributes)) {
+    node.setAttribute(name, value);
+  }
+  return node;
+}
+
+function stageBar(plan, current) {
+  const bar = element('div', 'stage-bar');
+  bar.setAttribute('aria-hidden', 'true');
+  for (const entry of plan) {
+    bar.append(element('span', segmentClass(entry, current)));
+  }
+  return bar;
+}
+
+// When every stage is closed, the last one is current but keeps the closed colour, as in the plan.
+function segmentClass(entry, current) {
+  if (isClosed(entry.steps)) {
+    return 'stage-segment stage-segment-closed';
+  }
+  return entry === current ? 'stage-segment stage-segment-current' : 'stage-segment';
 }
 
 function isEmpty(data) {

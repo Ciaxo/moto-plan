@@ -478,3 +478,79 @@
 .delete-all {
   margin-top: var(--sp-6);
 }
+
+.progress-card {
+  gap: var(--sp-4);
+  padding-top: var(--sp-6);
+}
+
+.gauge {
+  display: grid;
+  width: var(--gauge);
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.gauge > * {
+  grid-area: 1 / 1;
+}
+
+.gauge-drawing {
+  width: 100%;
+  height: auto;
+}
+
+.gauge-track,
+.gauge-fill {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.gauge-track {
+  stroke: var(--track);
+}
+
+.gauge-fill {
+  stroke: var(--accent);
+}
+
+.gauge-tick {
+  stroke: var(--gauge-tick);
+  stroke-linecap: round;
+}
+
+.gauge-percent {
+  align-self: end;
+  justify-self: center;
+  font-size: var(--fs-40);
+  font-weight: var(--fw-bold);
+  letter-spacing: var(--ls-display);
+  line-height: var(--lh-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.stage-bar {
+  display: flex;
+  gap: var(--sp-1);
+}
+
+.stage-segment {
+  flex: 1;
+  height: var(--bar-sm);
+  border-radius: var(--r-full);
+  background: var(--track);
+}
+
+.stage-segment-closed {
+  background: var(--accent);
+}
+
+.stage-segment-current {
+  background: var(--accent-mid);
+}
+
+.progress-caption {
+  color: var(--ink-2);
+  font-size: var(--fs-14);
+  text-align: center;
+}
