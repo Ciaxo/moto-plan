@@ -3,7 +3,8 @@ import { budgetSettings, budgetTotals, forecast } from '../lib/budget.js';
 import { formatDate, formatMonth, localDate } from '../lib/dates.js';
 import { formatAmount } from '../lib/format.js';
 import { ordered } from '../lib/order.js';
-import { checkbox, element, icon, screenHeader } from '../ui/elements.js';
+import { addButton, checkbox, element, icon, screenHeader } from '../ui/elements.js';
+import { openCostSheet } from './cost-sheet.js';
 
 const groups = [
   ['once', 'Jednorazowe'],
@@ -21,6 +22,7 @@ export function renderBudget(data, entered) {
   const { monthlyDeposit } = budgetSettings(data.settings);
   const totals = budgetTotals(data.costs, data.deposits);
   const costs = ordered(data.costs);
+  const context = { data, today };
   const screen = document.createDocumentFragment();
   screen.append(
     screenHeader('Budżet', { eyebrow: forecastText(forecast(totals, monthlyDeposit, today)) }),
@@ -29,9 +31,10 @@ export function renderBudget(data, entered) {
   for (const [group, title] of groups) {
     const inGroup = costs.filter((cost) => cost.group === group);
     if (inGroup.length > 0) {
-      screen.append(costGroup(`costs-${group}`, title, inGroup, today));
+      screen.append(costGroup(`costs-${group}`, title, inGroup, context));
     }
   }
+  screen.append(addButton('Dodaj koszt', 'add-cost', () => openCostSheet(data)));
   return screen;
 }
 
@@ -74,7 +77,7 @@ function figures(entries) {
   return list;
 }
 
-function costGroup(id, title, costs, today) {
+function costGroup(id, title, costs, context) {
   const card = element('details', 'card fold');
   card.open = expanded.has(id);
   card.addEventListener('toggle', () => {
@@ -94,15 +97,23 @@ function costGroup(id, title, costs, today) {
     element('span', 'group-sum', formatAmount(total)),
     chevron,
   );
-  card.append(summary, costList(costs, today));
+  card.append(summary, costList(costs, context));
   return card;
 }
 
-function costList(costs, today) {
+function costList(costs, { data, today }) {
   const list = element('ul', 'list cost-list');
   list.append(...costs.map((cost) => costRow(cost, today)));
   list.addEventListener('change', (event) => togglePaid(costs, event.target));
+  list.addEventListener('click', (event) => editCost(data, costs, event.target));
   return list;
+}
+
+function editCost(data, costs, target) {
+  const row = target.closest('.row-main');
+  if (row) {
+    openCostSheet(data, costs.find((cost) => cost.id === row.value));
+  }
 }
 
 function costRow(cost, today) {
