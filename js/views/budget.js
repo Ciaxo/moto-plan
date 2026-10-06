@@ -6,7 +6,7 @@ import { formatDate, formatMonth, localDate } from '../lib/dates.js';
 import { formatAmount, plural } from '../lib/format.js';
 import { ordered } from '../lib/order.js';
 import {
-  addButton, button, checkbox, element, icon, screenHeader, segmented,
+  addButton, button, checkbox, element, icon, percentBar, screenHeader, segmented,
 } from '../ui/elements.js';
 import { openCostSheet } from './cost-sheet.js';
 import { openDepositSheet, openMonthlySheet } from './deposit-sheet.js';
@@ -171,15 +171,6 @@ function goalCosts(goal, costs, context) {
   const list = foldCard(`goal-${goal.id}`, [heading], costList(costs, context));
   list.classList.add('goal-costs');
   return list;
-}
-
-// The percent, not the amounts: without costs a max of 0 would turn into 1 and fill the bar.
-function percentBar(percent, label) {
-  const bar = element('progress', 'progress');
-  bar.max = 100;
-  bar.value = percent;
-  bar.setAttribute('aria-label', label);
-  return bar;
 }
 
 function monthlyCard(monthlyDeposit) {

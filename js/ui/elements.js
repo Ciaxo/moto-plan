@@ -91,6 +91,15 @@ export function checkbox(label, value, checked) {
   return node;
 }
 
+// The percent, not the amounts: with a total of 0 a max of 0 would turn into 1 and fill the bar.
+export function percentBar(percent, label) {
+  const bar = element('progress', 'progress');
+  bar.max = 100;
+  bar.value = percent;
+  bar.setAttribute('aria-label', label);
+  return bar;
+}
+
 export function dueField(dueDate) {
   const savedKind = kindByLength[dueDate.length];
   const kinds = segmented('due-kind', dueKinds, savedKind);
