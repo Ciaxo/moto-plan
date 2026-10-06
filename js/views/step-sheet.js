@@ -1,7 +1,7 @@
 import { remove, save } from '../db.js';
 import { editRecord } from '../lib/pack.js';
 import { nextOrder } from '../lib/order.js';
-import { button, element, field, icon } from '../ui/elements.js';
+import { button, element, field, select } from '../ui/elements.js';
 import { closeSheet, openConfirm, openSheet } from '../ui/sheet.js';
 
 const emptyStep = { title: '', dueDate: '', cost: null, note: '' };
@@ -46,12 +46,13 @@ export function openStepSheet(plan, { step, stageId }) {
   if (values.hint) {
     note.before(element('span', 'field-hint', values.hint));
   }
+  const stages = plan.map(({ stage }, index) => [stage.id, `${index + 1} · ${stage.title}`]);
   const submit = element('button', 'button button-primary', 'Zapisz krok');
   submit.type = 'submit';
   const form = element('form', 'form');
   form.append(
     field('Tytuł', title),
-    field('Etap', stageSelect(plan, values.stageId)),
+    field('Etap', select('stage', stages, values.stageId)),
     dueField(values.dueDate),
     field('Koszt (zł)', cost),
     noteField,
@@ -78,19 +79,6 @@ function confirmRemove(step) {
     const addStep = CSS.escape(`add-step-${step.stageId}`);
     document.querySelector(`[data-id="${addStep}"]`).focus();
   });
-}
-
-function stageSelect(plan, stageId) {
-  const select = Object.assign(element('select', 'input'), { name: 'stage' });
-  plan.forEach(({ stage }, index) => {
-    const option = element('option', null, `${index + 1} · ${stage.title}`);
-    option.value = stage.id;
-    option.selected = stage.id === stageId;
-    select.append(option);
-  });
-  const wrapper = element('span', 'select');
-  wrapper.append(select, icon('chevron-down'));
-  return wrapper;
 }
 
 function dueField(dueDate) {

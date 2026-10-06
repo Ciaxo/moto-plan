@@ -43,6 +43,19 @@ export function field(label, control) {
   return node;
 }
 
+export function select(name, options, value) {
+  const node = Object.assign(element('select', 'input'), { name });
+  for (const [optionValue, label] of options) {
+    const option = element('option', null, label);
+    option.value = optionValue;
+    option.selected = optionValue === value;
+    node.append(option);
+  }
+  const wrapper = element('span', 'select');
+  wrapper.append(node, icon('chevron-down'));
+  return wrapper;
+}
+
 export function icon(name) {
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('class', 'icon');
