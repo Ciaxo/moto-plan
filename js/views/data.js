@@ -12,6 +12,10 @@ const days = ['dzień', 'dni', 'dni'];
 const deleteText = 'Plan, pytania, budżet i ustawienia znikną z tego urządzenia. '
   + 'Jeśli chcesz je zachować, najpierw wyeksportuj kopię.';
 
+const keptText = 'Przeglądarka zachowa te dane, nawet gdy zabraknie miejsca na urządzeniu.';
+const mayRemoveText = 'Przeglądarka może usunąć te dane, gdy zabraknie miejsca na urządzeniu. '
+  + 'Regularnie eksportuj kopię.';
+
 const themes = [
   ['light', 'Jasny'],
   ['dark', 'Ciemny'],
@@ -119,9 +123,21 @@ function privacyCard() {
     element('p', 'privacy-text', 'Wszystko jest zapisane tylko na tym urządzeniu. '
       + 'Bez konta, bez chmury, bez statystyk.'),
   );
+  if (navigator.storage) {
+    text.append(persistence());
+  }
   const card = element('section', 'card privacy');
   card.append(icon('shield'), text);
   return card;
+}
+
+// The screen is drawn at once, but the browser answers only with a promise.
+function persistence() {
+  const line = element('p', 'privacy-text');
+  navigator.storage.persisted().then((kept) => {
+    line.textContent = kept ? keptText : mayRemoveText;
+  });
+  return line;
 }
 
 function footer(data) {

@@ -472,6 +472,10 @@
   font-size: var(--fs-14);
 }
 
+.privacy-text + .privacy-text {
+  margin-top: var(--sp-2);
+}
+
 .screen-footer {
   color: var(--ink-2);
   font-size: var(--fs-14);

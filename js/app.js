@@ -96,6 +96,13 @@ async function redraw() {
   }
 }
 
+// After the first save rather than on the empty welcome screen. Asked on every start, because the
+// browser may answer differently once the app is installed.
+async function requestPersistence() {
+  await navigator.storage?.persist();
+  redraw();
+}
+
 async function start() {
   // Before the database, so the app files are cached even when the database cannot open.
   startUpdates();
@@ -110,6 +117,7 @@ async function start() {
   // The browser would restore the scroll position itself, while the old screen is still shown.
   history.scrollRestoration = 'manual';
   window.addEventListener('datachange', redraw);
+  window.addEventListener('datachange', requestPersistence, { once: true });
   startRouter(Object.keys(screens), enter);
 }
 
