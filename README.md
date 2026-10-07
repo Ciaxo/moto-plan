@@ -2,7 +2,7 @@
 
 A small offline app for planning the road to a motorcycle licence and a first bike. It keeps three things in one place: a step-by-step plan, a personal knowledge base and a savings budget.
 
-The interface is in Polish.
+The interface is in Polish. It is built for phones first. From a window width of 900 px the bottom tab bar turns into a side panel with an extra link to the Data screen.
 
 ## Status
 
@@ -18,7 +18,7 @@ Early development.
 - [x] Knowledge base
 - [x] Budget
 - [x] Start screen
-- [ ] Desktop layout
+- [x] Desktop layout
 - [ ] Installable, works offline
 - [ ] Published on GitHub Pages
 - [ ] Content pack export
@@ -111,7 +111,7 @@ A pack is data only. Its text is shown as plain text. Packs never contain deposi
 The Start screen sums up the plan and the budget.
 
 - The current stage is the first one that is not closed. A stage is closed when it has steps and all of them are done. When every stage is closed, the last one is current. The screen title is the stage's `headline`, or its `title` when there is none.
-- The gauge shows the share of done steps, rounded down, so it reaches 100% only when every step is done. The bar below it has one segment per stage.
+- The gauge shows the share of done steps, rounded down, so it reaches 100% only when every step is done. On a phone the bar below it has one segment per stage. On a wide screen the cards stand side by side and a separate Stages card (*Etapy*) shows every stage by name with its done and total steps.
 - Next steps (*Najbliższe kroki*) lists up to three steps that are not done, the earliest due first. A due date of only a year counts as the end of that year, a month as the end of that month, and steps without a date come last. Steps with the same due date keep their order in the plan. A step can be ticked off right there.
 - The savings card shows the same amounts and purchase estimate as the Budget screen and opens it. It appears once there is at least one cost.
 
@@ -144,7 +144,7 @@ Money assigned above a goal's value stays with that goal, so the last goal card 
 
 ## Backups
 
-Backups live on the Data screen, which opens from the settings icon on the Start screen.
+Backups live on the Data screen, which opens from the settings icon on the Start screen, or on a wide screen from the side panel.
 
 Export saves everything stored in the app to one file named `moto-plan-YYYY-MM-DD.json`, with the local date. The file holds every record, deleted ones included, so deletions carry over when you import it on another device.
 
@@ -168,7 +168,7 @@ There is one import button for backups and content packs. The app tells them apa
 
 A backup from a newer version of the app is rejected, and so is a damaged one. Every record needs a non-empty `id`, `deleted` set to `true` or `false`, and `createdAt` and `updatedAt` written exactly as JavaScript's `toISOString()` writes them, for example `2027-01-14T18:20:00.000Z`. Nothing is saved from a rejected file.
 
-The Data screen shows when you last exported a backup. When there has never been one, or the last one is more than 7 days old, and the app has changes made after it, a dot appears next to that line and on the settings icon on the Start screen.
+The Data screen shows when you last exported a backup. When there has never been one, or the last one is more than 7 days old, and the app has changes made after it, a dot appears next to that line and on the settings icon on the Start screen, or on a wide screen next to the Data link in the side panel.
 
 **Delete all data** (*Usuń wszystkie dane*) at the bottom of the Data screen removes the database and the stored theme from this browser after two confirmations. It cannot be undone, so export a backup first if you want to keep anything.
 
