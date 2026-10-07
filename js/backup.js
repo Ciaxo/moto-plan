@@ -11,20 +11,28 @@ const readError = 'Nie udało się odczytać pliku.';
 const unknownFile = 'Ten plik nie jest kopią zapasową ani paczką treści Moto Plan.';
 const backupTitle = 'Nie można wczytać kopii';
 const saveError = 'Nie udało się wczytać kopii. Dane w aplikacji się nie zmieniły.';
+const exportError = 'Nie udało się przygotować pliku kopii. Spróbuj jeszcze raz.';
 const replaceText = 'Dane w aplikacji zostaną zastąpione danymi z kopii. '
   + 'Jeśli nie masz ich w innej kopii, anuluj i najpierw je wyeksportuj.';
 
 export async function exportBackup() {
   const now = new Date();
   const exportedAt = now.toISOString();
-  // Saved first, so the file carries its own date and restoring it does not look like no backup.
-  await save('settings', { id: 'lastExportAt', value: exportedAt });
+  let data;
+  try {
+    // Saved first, so the file carries its own date and restoring it does not look like no backup.
+    await save('settings', { id: 'lastExportAt', value: exportedAt });
+    data = await loadAll();
+  } catch {
+    openErrors('Nie udało się wyeksportować', [exportError]);
+    return;
+  }
   const backup = {
     app: 'moto-plan',
     type: 'backup',
     schemaVersion: SCHEMA_VERSION,
     exportedAt,
-    data: await loadAll(),
+    data,
   };
   download(`moto-plan-${localDate(now)}.json`, JSON.stringify(backup, null, 2));
 }
