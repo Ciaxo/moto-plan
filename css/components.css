@@ -46,6 +46,67 @@
   background: var(--accent-soft);
 }
 
+.nav-title,
+.tab-data {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  body:has(.tabbar) {
+    padding-left: var(--sidebar-width);
+  }
+
+  .tabbar {
+    inset: 0 auto 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    width: var(--sidebar-width);
+    height: auto;
+    padding: var(--sp-6) var(--sp-3);
+    border-top: none;
+    border-right: var(--hairline) solid var(--line);
+  }
+
+  .nav-title {
+    display: block;
+    margin-bottom: var(--sp-4);
+    padding-inline: var(--sp-3);
+    font-size: var(--fs-20);
+    font-weight: var(--fw-bold);
+    line-height: var(--lh-tight);
+  }
+
+  .tab {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: var(--sp-3);
+    min-height: var(--control);
+    padding-inline: var(--sp-3);
+    border-radius: var(--r-md);
+    font-size: var(--fs-16);
+  }
+
+  .tab-icon {
+    width: var(--icon);
+    height: var(--icon);
+    padding: 0;
+  }
+
+  .tab-data {
+    display: flex;
+    margin-top: var(--sp-6);
+  }
+
+  .tab[aria-current="page"] {
+    background: var(--accent-soft);
+  }
+
+  .tab[aria-current="page"] .tab-icon {
+    background: none;
+  }
+}
+
 .screen-header {
   display: grid;
   grid-template-columns: 1fr;

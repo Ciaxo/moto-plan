@@ -49,3 +49,9 @@ fieldset {
   padding: var(--screen-pad);
   padding-bottom: calc(var(--nav-height) + var(--screen-pad));
 }
+
+@media (min-width: 900px) {
+  .screen {
+    padding-bottom: var(--screen-pad);
+  }
+}
