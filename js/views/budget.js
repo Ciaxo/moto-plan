@@ -19,6 +19,8 @@ const groups = [
 const modes = [['single', 'Jeden cel'], ['split', 'Osobne cele']];
 const depositForms = ['wpłata', 'wpłaty', 'wpłat'];
 const itemForms = ['pozycja', 'pozycje', 'pozycji'];
+const noCostsText = 'Budżet porównuje koszty z pieniędzmi, które odkładasz. '
+  + 'Dodaj pierwszy koszt.';
 const expanded = new Set();
 let lastGoalId;
 
@@ -34,7 +36,9 @@ export function renderBudget(data, entered) {
   const deposits = depositsByDate(data.deposits);
   // In the single goal mode no goal is shown anywhere, so deposits do not show theirs either.
   const context = { data, today, goals: split ? goals : [] };
+  const costs = ordered(data.costs);
   const addDeposit = () => openDepositSheet(context.goals);
+  const addCost = () => openCostSheet(data);
   const screen = document.createDocumentFragment();
   screen.append(screenHeader('Budżet', { eyebrow: forecastText(purchase) }));
   if (goals.length > 1) {
@@ -43,7 +47,9 @@ export function renderBudget(data, entered) {
   if (deposits.length === 0) {
     screen.append(starterCard(addDeposit));
   }
-  if (split) {
+  if (costs.length === 0) {
+    screen.append(noCostsCard(addCost));
+  } else if (split) {
     screen.append(...goalCards(funding, totals, purchase, context));
   } else {
     screen.append(summaryCard(totals));
@@ -55,10 +61,13 @@ export function renderBudget(data, entered) {
       addButton('Dodaj wpłatę', 'add-deposit', addDeposit),
     );
   }
-  if (!split) {
-    screen.append(...costGroups(ordered(data.costs), context));
+  if (costs.length === 0) {
+    return screen;
   }
-  screen.append(addButton('Dodaj koszt', 'add-cost', () => openCostSheet(data)));
+  if (!split) {
+    screen.append(...costGroups(costs, context));
+  }
+  screen.append(addButton('Dodaj koszt', 'add-cost', addCost));
   return screen;
 }
 
@@ -93,6 +102,16 @@ function starterCard(addDeposit) {
   card.append(
     element('p', null, 'Zacznij od tego, co już masz odłożone'),
     addButton('Dodaj pierwszą wpłatę', 'add-deposit', addDeposit),
+  );
+  return card;
+}
+
+// Same data-id as "Dodaj koszt" below the costs, which takes the focus when this card disappears.
+function noCostsCard(addCost) {
+  const card = element('section', 'card');
+  card.append(
+    element('p', null, noCostsText),
+    addButton('Dodaj koszt', 'add-cost', addCost),
   );
   return card;
 }
