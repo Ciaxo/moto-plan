@@ -593,3 +593,32 @@ legend.field-label {
   flex-direction: column;
   gap: var(--sp-4);
 }
+
+@media (min-width: 900px) {
+  .sheet {
+    max-width: var(--sheet-max);
+    margin: auto;
+    padding-top: var(--screen-pad);
+    border-radius: var(--r-sheet);
+    opacity: 0;
+    translate: none;
+    transition:
+      opacity var(--dur-sheet) var(--ease),
+      display var(--dur-sheet) allow-discrete,
+      overlay var(--dur-sheet) allow-discrete;
+  }
+
+  .sheet[open] {
+    opacity: 1;
+  }
+
+  @starting-style {
+    .sheet[open] {
+      opacity: 0;
+    }
+  }
+
+  .sheet-handle {
+    display: none;
+  }
+}
