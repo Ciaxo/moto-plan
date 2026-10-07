@@ -4,6 +4,7 @@ import { localDate } from './lib/dates.js';
 import { startRouter } from './router.js';
 import { startTheme } from './theme.js';
 import { dot, element } from './ui/elements.js';
+import { startUpdates } from './update.js';
 import { dataLabel, renderStart } from './views/start.js';
 import { renderPlan } from './views/plan.js';
 import { renderKnowledge } from './views/knowledge.js';
@@ -96,6 +97,8 @@ async function redraw() {
 }
 
 async function start() {
+  // Before the database, so the app files are cached even when the database cannot open.
+  startUpdates();
   try {
     await openDatabase();
   } catch {
