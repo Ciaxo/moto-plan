@@ -208,12 +208,15 @@ function savingsCard(totals, purchase) {
   const card = element('a', 'card savings');
   card.href = '#/budzet';
   const collected = `${formatAmount(totals.collected)} z ${formatAmount(totals.total)}`;
+  const bar = percentBar(totals.percent, 'Zebrane');
+  // In a link the bar would add a bare number to the link's name, and the amounts say it already.
+  bar.setAttribute('aria-hidden', 'true');
   card.append(
     savingsRow(
       element('span', 'savings-title', 'Zebrane'),
       element('span', 'savings-meta', collected),
     ),
-    percentBar(totals.percent, 'Zebrane'),
+    bar,
     savingsRow(
       element('span', 'savings-meta', 'Zakup około'),
       element('span', 'savings-title', purchase.message ?? formatMonth(purchase.month)),
