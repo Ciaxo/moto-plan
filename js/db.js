@@ -41,19 +41,21 @@ export async function loadAll() {
 export async function saveAll(changes) {
   const now = new Date().toISOString();
   const transaction = db.transaction(STORES, 'readwrite');
-  for (const { store, record } of changes) {
-    const records = transaction.objectStore(store);
-    const reading = records.get(record.id);
-    // A request made in a success handler keeps the transaction open, so all writes commit at once.
-    reading.onsuccess = () => {
-      records.put({
-        ...record,
-        createdAt: reading.result?.createdAt ?? now,
-        updatedAt: now,
-        deleted: record.deleted ?? false,
-      });
-    };
-  }
+  queueWrites(transaction, () => {
+    for (const { store, record } of changes) {
+      const records = transaction.objectStore(store);
+      const reading = records.get(record.id);
+      // A request made in a success handler keeps the transaction open, so all writes commit at once.
+      reading.onsuccess = () => {
+        records.put({
+          ...record,
+          createdAt: reading.result?.createdAt ?? now,
+          updatedAt: now,
+          deleted: record.deleted ?? false,
+        });
+      };
+    }
+  });
   await transactionDone(transaction);
   window.dispatchEvent(new Event('datachange'));
 }
@@ -70,17 +72,29 @@ export async function remove(store, id) {
 // Unlike saveAll, keeps the dates from the backup file, because they decide later merges.
 export async function restoreAll(changes, replace) {
   const transaction = db.transaction(STORES, 'readwrite');
-  // Cleared in the same transaction, so a failed write leaves the old data in place.
-  if (replace) {
-    for (const store of STORES) {
-      transaction.objectStore(store).clear();
+  queueWrites(transaction, () => {
+    // Cleared in the same transaction, so a failed write leaves the old data in place.
+    if (replace) {
+      for (const store of STORES) {
+        transaction.objectStore(store).clear();
+      }
     }
-  }
-  for (const { store, record } of changes) {
-    transaction.objectStore(store).put(record);
-  }
+    for (const { store, record } of changes) {
+      transaction.objectStore(store).put(record);
+    }
+  });
   await transactionDone(transaction);
   window.dispatchEvent(new Event('datachange'));
+}
+
+// A transaction commits the requests made so far even when the code making them throws halfway.
+function queueWrites(transaction, queue) {
+  try {
+    queue();
+  } catch (error) {
+    transaction.abort();
+    throw error;
+  }
 }
 
 function requestDone(request) {
