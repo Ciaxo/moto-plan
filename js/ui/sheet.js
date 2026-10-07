@@ -20,10 +20,25 @@ export function closeSheet() {
 
 export function onSubmit(form, save) {
   const submit = form.querySelector('[type="submit"]');
+  const error = element('p', 'form-error', 'Nie udało się zapisać. Spróbuj jeszcze raz.');
+  error.setAttribute('role', 'alert');
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    // Disabling the button takes the focus away from it, to the page behind the sheet.
+    const hadFocus = document.activeElement === submit;
     submit.disabled = true;
-    await save();
+    error.remove();
+    try {
+      await save();
+    } catch {
+      // The sheet stays open with everything typed in, so saving can simply be tried again.
+      submit.before(error);
+      submit.disabled = false;
+      if (hadFocus) {
+        submit.focus();
+      }
+      return;
+    }
     closeSheet();
   });
 }

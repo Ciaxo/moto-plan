@@ -475,6 +475,11 @@ legend.field-label {
   font-size: var(--fs-14);
 }
 
+.form-error {
+  color: var(--warn);
+  font-weight: var(--fw-semibold);
+}
+
 .form {
   display: flex;
   flex-direction: column;
