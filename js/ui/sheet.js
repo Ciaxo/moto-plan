@@ -33,7 +33,9 @@ export function onSubmit(form, save) {
 // the message here.
 export function openConfirm(heading, text, label, onConfirm) {
   const error = errorLine('Nie udało się usunąć. Spróbuj jeszcze raz.');
-  const confirm = button(label, 'button button-primary', () => tryAction(confirm, error, onConfirm));
+  const confirm = button(label, 'button button-primary', () => {
+    tryAction(confirm, error, onConfirm);
+  });
   const cancel = button('Anuluj', 'button', closeSheet);
   const body = document.createDocumentFragment();
   body.append(element('p', null, text), confirm, cancel);

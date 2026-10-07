@@ -105,7 +105,6 @@ function notesCard(question) {
         openSaveError(lostNotes);
         return;
       }
-      // A newer save already carries the text and shows its own result.
       failed = shown === saved;
       changed.hidden = false;
       changed.textContent = 'Nie udało się zapisać notatki.';

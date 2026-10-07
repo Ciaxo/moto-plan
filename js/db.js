@@ -45,7 +45,8 @@ export async function saveAll(changes) {
     for (const { store, record } of changes) {
       const records = transaction.objectStore(store);
       const reading = records.get(record.id);
-      // A request made in a success handler keeps the transaction open, so all writes commit at once.
+      // A request made in a success handler keeps the transaction open, so all writes commit
+      // at once.
       reading.onsuccess = () => {
         records.put({
           ...record,
