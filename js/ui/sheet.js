@@ -29,7 +29,8 @@ export function onSubmit(form, save) {
   });
 }
 
-// Replacing all data shows its own errors, so only deleting ever reaches the message here.
+// Replacing and deleting all data show their own errors, so only deleting a record ever reaches
+// the message here.
 export function openConfirm(heading, text, label, onConfirm) {
   const error = errorLine('Nie udało się usunąć. Spróbuj jeszcze raz.');
   const confirm = button(label, 'button button-primary', () => tryAction(confirm, error, onConfirm));

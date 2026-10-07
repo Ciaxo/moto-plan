@@ -6,7 +6,7 @@ import { nouns, plural } from '../lib/format.js';
 import { installedPacks } from '../lib/pack.js';
 import { forgetTheme, setTheme } from '../theme.js';
 import { backLink, button, dot, element, icon, screenHeader, segmented } from '../ui/elements.js';
-import { openConfirm, openSaveError } from '../ui/sheet.js';
+import { openConfirm, openErrors, openSaveError } from '../ui/sheet.js';
 
 const days = ['dzień', 'dni', 'dni'];
 const deleteText = 'Plan, pytania, budżet i ustawienia znikną z tego urządzenia. '
@@ -145,7 +145,13 @@ function deleteButton() {
 
 // A reload opens a fresh empty database and starts the theme from scratch.
 async function deleteAll() {
-  await deleteDatabase();
+  try {
+    await deleteDatabase();
+  } catch {
+    // The connection is closed by then, so nothing can be saved again until the page reloads.
+    openErrors('Nie udało się usunąć danych', ['Odśwież stronę i spróbuj jeszcze raz.']);
+    return;
+  }
   forgetTheme();
   history.replaceState(null, '', '#/start');
   location.reload();
