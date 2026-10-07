@@ -479,6 +479,13 @@
   margin-top: var(--sp-6);
 }
 
+.start-cards,
+.next-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
 .progress-card {
   gap: var(--sp-4);
   padding-top: var(--sp-6);
@@ -574,4 +581,29 @@
 
 .savings-meta {
   color: var(--ink-2);
+}
+
+@media (min-width: 900px) {
+  .settings-link,
+  .stage-bar {
+    display: none;
+  }
+
+  .start-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(var(--card-min), 1fr));
+    align-items: start;
+  }
+
+  .next-steps {
+    gap: 0;
+    border-radius: var(--r-xl);
+    background: var(--surface);
+  }
+
+  .next-steps > .section-header {
+    margin-top: 0;
+    padding: var(--sp-2) var(--sp-4);
+    border-bottom: var(--hairline) solid var(--line-soft);
+  }
 }

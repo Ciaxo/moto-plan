@@ -29,15 +29,17 @@ export function renderStart(data) {
     return screen;
   }
   const steps = plan.flatMap((entry) => entry.steps);
+  const cards = element('div', 'start-cards');
   if (plan.length > 0) {
-    screen.append(progressCard(plan, steps, current));
+    cards.append(progressCard(plan, steps, current));
   }
-  screen.append(...nextStepsSection(plan, steps, today));
+  cards.append(nextStepsSection(plan, steps, today));
   const totals = budgetTotals(data.costs, data.deposits);
   if (totals.total > 0) {
     const { monthlyDeposit } = budgetSettings(data.settings);
-    screen.append(savingsCard(totals, forecast(totals, monthlyDeposit, today)));
+    cards.append(savingsCard(totals, forecast(totals, monthlyDeposit, today)));
   }
+  screen.append(cards);
   return screen;
 }
 
@@ -56,7 +58,7 @@ export function dataLabel(warn) {
 }
 
 function settingsLink(warn) {
-  const settings = element('a', 'icon-button');
+  const settings = element('a', 'icon-button settings-link');
   settings.href = '#/dane';
   settings.setAttribute('aria-label', dataLabel(warn));
   settings.append(icon('settings'));
@@ -145,7 +147,10 @@ function nextStepsSection(plan, steps, today) {
   allSteps.dataset.id = 'all-steps';
   const heading = element('div', 'section-header');
   heading.append(element('h2', 'section-title', 'Najbliższe kroki'), allSteps);
-  return [heading, nextStepsCard(plan, steps, today, allSteps)];
+  // One element, so on a laptop the heading and the list sit together in one grid cell.
+  const section = element('section', 'next-steps');
+  section.append(heading, nextStepsCard(plan, steps, today, allSteps));
+  return section;
 }
 
 function nextStepsCard(plan, steps, today, allSteps) {
