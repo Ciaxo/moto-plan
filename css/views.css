@@ -222,7 +222,6 @@
 
 .question-header .screen-title {
   font-size: var(--fs-24);
-  overflow-wrap: anywhere;
 }
 
 .answer p {
