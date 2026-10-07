@@ -19,7 +19,7 @@ Early development.
 - [x] Budget
 - [x] Start screen
 - [x] Desktop layout
-- [ ] Installable, works offline
+- [x] Installable, works offline
 - [ ] Published on GitHub Pages
 - [ ] Content pack export
 
@@ -39,6 +39,8 @@ python -m http.server 8000
 ```
 
 Open `http://localhost:8000`.
+
+The app registers a service worker, which serves the app files from its own cache even after they change on disk. While working on the code, tick DevTools → Application → Service workers → *Bypass for network* in Edge or Chrome, or reload with Ctrl+F5, which also skips the browser's HTTP cache. Service workers need a secure context: `localhost` works, an address such as `http://192.168.1.10:8000` does not, and there the app runs without offline support.
 
 ## Content packs
 
@@ -170,11 +172,21 @@ A backup from a newer version of the app is rejected, and so is a damaged one. E
 
 The Data screen shows when you last exported a backup. When there has never been one, or the last one is more than 7 days old, and the app has changes made after it, a dot appears next to that line and on the settings icon on the Start screen, or on a wide screen next to the Data link in the side panel.
 
-**Delete all data** (*Usuń wszystkie dane*) at the bottom of the Data screen removes the database and the stored theme from this browser after two confirmations. It cannot be undone, so export a backup first if you want to keep anything.
+**Delete all data** (*Usuń wszystkie dane*) at the bottom of the Data screen removes the database and the stored theme from this browser after two confirmations. It cannot be undone, so export a backup first if you want to keep anything. The app files kept for offline use stay.
+
+## Offline use and updates
+
+Browsers that support it offer to install the app, for example with the install icon in the address bar of Edge. After the first visit a service worker keeps every app file in the browser, so the app opens and works without a connection, data included.
+
+The app checks for a new version when it opens and when you come back to it. A new version is downloaded in the background, and then a bar with *Jest nowa wersja* and a *Odśwież* button appears above the navigation, or at the bottom of the window on a wide screen. The new version starts when you press the button, or by itself once every tab of the app has been closed.
+
+After the first change you make, the app asks the browser to keep its data even when the device runs low on space. Chrome and Edge decide on their own, Firefox asks you. The Privacy card on the Data screen says whether the browser agreed. Either way, an exported backup is the only safe copy.
 
 ## Privacy
 
 This repository contains code and a generic example only. Personal backups and private content packs are ignored by git (`moto-plan-*.json`, `prywatne/`). Do not commit them.
+
+If you host the app on your own GitHub Pages, keep in mind that the browser stores data per address, not per repository. The database, the theme setting and the offline files are shared by all your sites under `https://<account>.github.io`, and clearing site data for that address removes them for all of them.
 
 ## Project layout
 
@@ -182,6 +194,8 @@ Target layout. Files appear as the app is built.
 
 ```
 index.html              app shell
+manifest.webmanifest    web app manifest
+sw.js                   service worker with the list of app files
 css/                    styles, design tokens in tokens.css
 js/                     app code (ES modules)
 js/lib/                 pure functions, covered by tests
@@ -195,8 +209,15 @@ tests/                  browser test page
 
 - `master` always works. Each change is made on a short-lived branch and merged when its checks pass.
 - Commits are small and do one thing. Messages are one short line in the imperative: `Add hash router`, `Fix step counter after delete`.
-- Tests for the pure functions run in the browser at `http://localhost:8000/tests/`.
-- The version number is in `js/version.js` and is shown at the bottom of the Data screen.
+- Tests for the pure functions run in the browser at `http://localhost:8000/tests/`. The test page is also served by the service worker, so bypass it as described in [Run locally](#run-locally), or the tests run against cached modules.
+- The version number is in `js/version.js` and is shown at the bottom of the Data screen. The service worker downloads new files only when `sw.js` or `js/version.js` changes, so every merged change to the app files raises the version: the third number for a fix, the second for a new feature. A change to the list of app files always raises it.
+- Every file the app loads is listed in `FILES` in `sw.js`, in the order of `git ls-files`: everything in the repository except dotfiles, `README.md`, `LICENSE`, `sw.js` and `tests/`. A listed file that does not exist breaks the service worker install, and a file missing from the list does not work offline. After adding, moving or removing a file, update the list and compare it with the repository (Git Bash):
+
+  ```
+  diff <(git ls-files -co --exclude-standard | grep -vE '^(\.|README\.md$|LICENSE$|sw\.js$|tests/)' | LC_ALL=C sort) <(grep -oE "^  '\./[^']+'" sw.js | sed -E "s/^  '\.\/(.*)'$/\1/")
+  ```
+
+  No output means the list matches. Lines with `<` are files missing from the list, lines with `>` are listed files that do not exist.
 
 ## License
 
