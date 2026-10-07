@@ -86,15 +86,24 @@ function notesCard(question) {
   label.append(element('span', 'card-title', 'Moje notatki'), field);
   const changed = element('p', 'notes-changed');
   showChanged(changed, question);
+  // The failed text stays in shown, so a status or form save made meanwhile still carries it.
+  let failed = false;
   const saveNotes = () => {
     clearTimeout(notesTimer);
     // An old field may still lose focus after another question took over the screen.
-    if (shown.id !== question.id || field.value === shown.notes) {
+    if (shown.id !== question.id || (field.value === shown.notes && !failed)) {
       return;
     }
+    failed = false;
     shown = { ...shown, notes: field.value, notesAt: new Date().toISOString() };
     const saved = shown;
-    save('questions', saved).then(() => showChanged(changed, saved));
+    save('questions', saved).then(() => showChanged(changed, saved), () => {
+      // A newer save already carries the text and shows its own result.
+      failed = shown === saved;
+      changed.hidden = false;
+      changed.textContent = 'Nie udało się zapisać notatki.';
+      changed.classList.add('form-error');
+    });
   };
   flushNotes = saveNotes;
   field.addEventListener('input', () => {
@@ -108,6 +117,7 @@ function notesCard(question) {
 }
 
 function showChanged(node, question) {
+  node.classList.remove('form-error');
   node.hidden = question.notes.trim() === '';
   if (!node.hidden) {
     const day = localDate(new Date(question.notesAt));

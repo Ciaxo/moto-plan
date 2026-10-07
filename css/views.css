@@ -241,6 +241,10 @@
   font-size: var(--fs-14);
 }
 
+.notes-changed.form-error {
+  color: var(--warn);
+}
+
 .source {
   flex-direction: row;
   align-items: center;
