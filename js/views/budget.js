@@ -8,6 +8,7 @@ import { ordered } from '../lib/order.js';
 import {
   addButton, button, checkbox, element, icon, percentBar, screenHeader, segmented,
 } from '../ui/elements.js';
+import { openSaveError } from '../ui/sheet.js';
 import { openCostSheet } from './cost-sheet.js';
 import { openDepositSheet, openMonthlySheet } from './deposit-sheet.js';
 
@@ -91,7 +92,10 @@ function modeSwitch(goalMode) {
   const options = segmented('goal-mode', modes, goalMode);
   options.setAttribute('aria-label', 'Tryb budżetu');
   options.addEventListener('change', (event) => {
-    save('settings', { id: 'goalMode', value: event.target.value });
+    save('settings', { id: 'goalMode', value: event.target.value }).catch(() => {
+      options.querySelector(`[value="${goalMode}"]`).checked = true;
+      openSaveError();
+    });
   });
   return options;
 }
@@ -333,5 +337,9 @@ function togglePaid(costs, input) {
   const cost = costs.find((item) => item.id === input.value);
   const paid = input.checked;
   const status = paid ? 'paid' : 'planned';
-  save('costs', { ...cost, status, paidAt: paid ? new Date().toISOString() : null });
+  const paidAt = paid ? new Date().toISOString() : null;
+  save('costs', { ...cost, status, paidAt }).catch(() => {
+    input.checked = !paid;
+    openSaveError();
+  });
 }

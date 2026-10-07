@@ -3,6 +3,7 @@ import { formatDate, localDate } from '../lib/dates.js';
 import { formatAmount, plural } from '../lib/format.js';
 import { countDone, currentStage, isClosed, planStages } from '../lib/plan.js';
 import { addButton, button, checkbox, element, icon, screenHeader } from '../ui/elements.js';
+import { openSaveError } from '../ui/sheet.js';
 import { openStageSheet } from './stage-sheet.js';
 import { openStepSheet } from './step-sheet.js';
 
@@ -57,7 +58,11 @@ function expandCurrent(current, entered) {
 export function toggleStep(steps, checkbox) {
   const step = steps.find((item) => item.id === checkbox.value);
   const done = checkbox.checked;
-  save('steps', { ...step, done, doneAt: done ? new Date().toISOString() : null });
+  const doneAt = done ? new Date().toISOString() : null;
+  save('steps', { ...step, done, doneAt }).catch(() => {
+    checkbox.checked = !done;
+    openSaveError();
+  });
 }
 
 export function clickedStep(steps, target) {

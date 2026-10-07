@@ -6,7 +6,7 @@ import { nouns, plural } from '../lib/format.js';
 import { installedPacks } from '../lib/pack.js';
 import { forgetTheme, setTheme } from '../theme.js';
 import { backLink, button, dot, element, icon, screenHeader, segmented } from '../ui/elements.js';
-import { openConfirm } from '../ui/sheet.js';
+import { openConfirm, openSaveError } from '../ui/sheet.js';
 
 const days = ['dzień', 'dni', 'dni'];
 const deleteText = 'Plan, pytania, budżet i ustawienia znikną z tego urządzenia. '
@@ -102,7 +102,12 @@ function themeCard(data) {
   const current = data.settings.find((record) => record.id === 'theme')?.value ?? 'system';
   const options = segmented('theme', themes, current);
   options.setAttribute('aria-label', 'Wygląd');
-  options.addEventListener('change', (event) => setTheme(event.target.value));
+  options.addEventListener('change', (event) => {
+    setTheme(event.target.value).catch(() => {
+      options.querySelector(`[value="${current}"]`).checked = true;
+      openSaveError();
+    });
+  });
   card.append(element('h2', 'card-title', 'Wygląd'), options);
   return card;
 }

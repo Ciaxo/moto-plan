@@ -6,9 +6,16 @@ const themeColor = document.querySelector('meta[name="theme-color"]');
 let current = 'system';
 
 export async function setTheme(theme) {
+  const previous = current;
   current = theme;
   applyTheme();
-  await save('settings', { id: 'theme', value: theme });
+  try {
+    await save('settings', { id: 'theme', value: theme });
+  } catch (error) {
+    current = previous;
+    applyTheme();
+    throw error;
+  }
   localStorage.setItem(KEY, theme);
 }
 

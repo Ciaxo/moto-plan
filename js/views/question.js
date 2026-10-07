@@ -2,6 +2,7 @@ import { save } from '../db.js';
 import { formatDate, localDate } from '../lib/dates.js';
 import { textBlocks } from '../lib/text.js';
 import { backLink, button, element, icon, screenHeader, segmented } from '../ui/elements.js';
+import { openSaveError } from '../ui/sheet.js';
 import { openQuestionSheet } from './question-sheet.js';
 
 const statuses = [[false, 'Nie wiem'], [true, 'Umiem']];
@@ -69,7 +70,11 @@ function statusSwitch(question) {
   options.setAttribute('aria-label', 'Status');
   options.addEventListener('change', (event) => {
     const known = event.target.value === 'true';
-    save('questions', { ...shown, known, knownAt: known ? new Date().toISOString() : null });
+    const knownAt = known ? new Date().toISOString() : null;
+    save('questions', { ...shown, known, knownAt }).catch(() => {
+      options.querySelector(`[value="${!known}"]`).checked = true;
+      openSaveError();
+    });
   });
   return options;
 }
