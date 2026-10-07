@@ -247,29 +247,6 @@
   background: var(--accent);
 }
 
-.chips {
-  display: flex;
-  gap: var(--sp-2);
-  margin-inline: calc(-1 * var(--screen-pad));
-  padding: var(--sp-1) var(--screen-pad);
-  overflow-x: auto;
-}
-
-.chip {
-  position: relative;
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  min-height: var(--tap);
-  padding-inline: var(--sp-5);
-  border: var(--border) solid var(--line);
-  border-radius: var(--r-full);
-  background: var(--surface);
-  font-weight: var(--fw-semibold);
-  white-space: nowrap;
-}
-
-.chip input,
 .segment input {
   position: absolute;
   inset: 0;
@@ -277,13 +254,6 @@
   opacity: 0;
 }
 
-.chip:has(:checked) {
-  border-color: var(--ink);
-  background: var(--ink);
-  color: var(--surface);
-}
-
-.chip:has(:focus-visible),
 .segment:has(:focus-visible) {
   outline: var(--border-thick) solid var(--accent);
   outline-offset: var(--focus-offset);
