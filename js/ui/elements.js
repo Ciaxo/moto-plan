@@ -106,6 +106,8 @@ export function percentBar(percent, label) {
 export function dueField(dueDate) {
   const savedKind = kindByLength[dueDate.length];
   const kinds = segmented('due-kind', dueKinds, savedKind);
+  // The legend already names the group, so the switch inside does not make a second, unnamed one.
+  kinds.setAttribute('role', 'none');
   const group = element('fieldset', 'field');
   group.append(element('legend', 'field-label', 'Termin'), kinds);
   let input = dueInput(savedKind, dueDate);

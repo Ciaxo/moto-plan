@@ -68,8 +68,11 @@ export function openCostSheet(data, cost) {
 }
 
 function choice(label, name, options, value) {
+  const choices = segmented(name, options, value);
+  // The legend already names the group, so the switch inside does not make a second, unnamed one.
+  choices.setAttribute('role', 'none');
   const group = element('fieldset', 'field');
-  group.append(element('legend', 'field-label', label), segmented(name, options, value));
+  group.append(element('legend', 'field-label', label), choices);
   return group;
 }
 
