@@ -95,6 +95,7 @@
   --handle-width: 40px;
   --handle-height: 4px;
   --nav-height: 70px;
+  --update-bar: calc(var(--tap) + 2 * var(--sp-2));
   --sheet-max: 480px;
   --content-max: 1040px;
   --sidebar-width: 240px;
