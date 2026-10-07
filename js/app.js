@@ -9,7 +9,6 @@ import { renderQuestion } from './views/question.js';
 import { renderBudget } from './views/budget.js';
 import { renderMotorcycle } from './views/motorcycle.js';
 import { renderData } from './views/data.js';
-import { renderComponents } from './views/components.js';
 
 const screens = {
   start: renderStart,
@@ -18,7 +17,6 @@ const screens = {
   budzet: renderBudget,
   motocykl: renderMotorcycle,
   dane: renderData,
-  komponenty: renderComponents,
 };
 
 const databaseError = 'Nie da się otworzyć bazy danych. Przeglądarka nie pozwala tej stronie '
