@@ -2,7 +2,7 @@ import { remove, saveAll } from '../db.js';
 import { nextOrder, ordered } from '../lib/order.js';
 import { editRecord } from '../lib/pack.js';
 import { button, dueField, element, field, segmented, select } from '../ui/elements.js';
-import { closeSheet, openConfirm, openSheet } from '../ui/sheet.js';
+import { closeSheet, onSubmit, openConfirm, openSheet } from '../ui/sheet.js';
 
 const groups = [['once', 'Jednorazowy'], ['yearly', 'Roczny'], ['hidden', 'Ukryty']];
 const statuses = [['planned', 'Planowane'], ['paid', 'Zapłacone']];
@@ -58,12 +58,7 @@ export function openCostSheet(data, cost) {
   if (cost) {
     form.append(button('Usuń koszt', 'button button-secondary', () => confirmRemove(cost)));
   }
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    submit.disabled = true;
-    await saveCost(data, cost, formValues(form.elements));
-    closeSheet();
-  });
+  onSubmit(form, () => saveCost(data, cost, formValues(form.elements)));
   openSheet(cost ? 'Edytuj koszt' : 'Nowy koszt', form);
 }
 

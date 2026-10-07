@@ -2,7 +2,7 @@ import { remove, saveAll } from '../db.js';
 import { nextOrder, ordered } from '../lib/order.js';
 import { editRecord } from '../lib/pack.js';
 import { button, element, field, select } from '../ui/elements.js';
-import { closeSheet, openConfirm, openSheet } from '../ui/sheet.js';
+import { closeSheet, onSubmit, openConfirm, openSheet } from '../ui/sheet.js';
 
 const answerHint = 'Pusta linia zaczyna nowy akapit, a linia od „- " punkt listy.';
 // No record has an empty id, so this option cannot be mistaken for a category.
@@ -77,12 +77,7 @@ export function openQuestionSheet(data, { question, categoryId }) {
     form.append(button('Usuń pytanie', 'button button-secondary', () => confirmRemove(question)));
   }
   showCategoryName();
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    submit.disabled = true;
-    await saveQuestion(data, question, formValues(form.elements));
-    closeSheet();
-  });
+  onSubmit(form, () => saveQuestion(data, question, formValues(form.elements)));
   openSheet(question ? 'Edytuj pytanie' : 'Nowe pytanie', form);
 }
 

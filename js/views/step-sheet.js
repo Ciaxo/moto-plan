@@ -2,7 +2,7 @@ import { remove, save } from '../db.js';
 import { nextOrder } from '../lib/order.js';
 import { editRecord } from '../lib/pack.js';
 import { button, dueField, element, field, select } from '../ui/elements.js';
-import { closeSheet, openConfirm, openSheet } from '../ui/sheet.js';
+import { closeSheet, onSubmit, openConfirm, openSheet } from '../ui/sheet.js';
 
 const emptyStep = { title: '', dueDate: '', cost: null, note: '' };
 const newStep = {
@@ -55,12 +55,7 @@ export function openStepSheet(plan, { step, stageId, removeFocus }) {
       button('Usuń krok', 'button button-secondary', () => confirmRemove(step, removeFocus)),
     );
   }
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    submit.disabled = true;
-    await saveStep(plan, step, formValues(form.elements));
-    closeSheet();
-  });
+  onSubmit(form, () => saveStep(plan, step, formValues(form.elements)));
   openSheet(step ? 'Edytuj krok' : 'Nowy krok', form);
 }
 

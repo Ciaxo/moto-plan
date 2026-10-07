@@ -2,7 +2,7 @@ import { remove, save } from '../db.js';
 import { nextOrder } from '../lib/order.js';
 import { editRecord } from '../lib/pack.js';
 import { button, element, field } from '../ui/elements.js';
-import { closeSheet, openConfirm, openSheet } from '../ui/sheet.js';
+import { closeSheet, onSubmit, openConfirm, openSheet } from '../ui/sheet.js';
 
 const newStage = { origin: 'user', packId: null, userModified: false, headline: '' };
 
@@ -35,12 +35,7 @@ export function openStageSheet(plan, entry) {
   } else if (entry) {
     form.append(button('Usuń etap', 'button button-secondary', () => confirmRemove(stage)));
   }
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    submit.disabled = true;
-    await saveStage(plan, stage, { title: title.value, period: period.value });
-    closeSheet();
-  });
+  onSubmit(form, () => saveStage(plan, stage, { title: title.value, period: period.value }));
   openSheet(stage ? 'Edytuj etap' : 'Nowy etap', form);
 }
 

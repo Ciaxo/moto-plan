@@ -3,7 +3,7 @@ import { formatDate, localDate } from '../lib/dates.js';
 import { formatAmount } from '../lib/format.js';
 import { editRecord } from '../lib/pack.js';
 import { button, element, field, select } from '../ui/elements.js';
-import { closeSheet, openConfirm, openSheet } from '../ui/sheet.js';
+import { closeSheet, onSubmit, openConfirm, openSheet } from '../ui/sheet.js';
 
 // No record has an empty id, so this option cannot be mistaken for a goal.
 const AUTOMATIC = '';
@@ -51,12 +51,7 @@ export function openDepositSheet(goals, deposit) {
   if (deposit) {
     form.append(button('Usuń wpłatę', 'button button-secondary', () => confirmRemove(deposit)));
   }
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    submit.disabled = true;
-    await saveDeposit(deposit, formValues(form.elements));
-    closeSheet();
-  });
+  onSubmit(form, () => saveDeposit(deposit, formValues(form.elements)));
   openSheet(deposit ? 'Edytuj wpłatę' : 'Nowa wpłata', form);
 }
 
@@ -112,14 +107,11 @@ export function openMonthlySheet(monthlyDeposit) {
     submit,
     button('Anuluj', 'button', closeSheet),
   );
-  form.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    submit.disabled = true;
+  onSubmit(form, async () => {
     const value = Number(amount.value);
     if (value !== monthlyDeposit) {
       await save('settings', { id: 'monthlyDeposit', value });
     }
-    closeSheet();
   });
   openSheet('Wpłata co miesiąc', form);
 }

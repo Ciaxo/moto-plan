@@ -18,6 +18,16 @@ export function closeSheet() {
   sheet.close();
 }
 
+export function onSubmit(form, save) {
+  const submit = form.querySelector('[type="submit"]');
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    submit.disabled = true;
+    await save();
+    closeSheet();
+  });
+}
+
 export function openConfirm(heading, text, label, onConfirm) {
   const confirm = button(label, 'button button-primary', () => {
     confirm.disabled = true;
