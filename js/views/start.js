@@ -39,6 +39,9 @@ export function renderStart(data) {
     const { monthlyDeposit } = budgetSettings(data.settings);
     cards.append(savingsCard(totals, forecast(totals, monthlyDeposit, today)));
   }
+  if (plan.length > 0) {
+    cards.append(stagesCard(plan, current));
+  }
   screen.append(cards);
   return screen;
 }
@@ -139,6 +142,28 @@ function segmentClass(entry, current) {
     return 'stage-segment stage-segment-closed';
   }
   return entry === current ? 'stage-segment stage-segment-current' : 'stage-segment';
+}
+
+// Shown only on a laptop, where it takes the place of the stage bar in the progress card.
+function stagesCard(plan, current) {
+  const list = element('ol', 'stage-columns');
+  for (const entry of plan) {
+    const bar = element('span', segmentClass(entry, current));
+    bar.setAttribute('aria-hidden', 'true');
+    const item = element('li', 'stage-column');
+    if (entry === current) {
+      item.setAttribute('aria-current', 'step');
+    }
+    item.append(
+      bar,
+      element('span', 'stage-name', entry.stage.title),
+      element('span', 'stage-done', `${countDone(entry.steps)}/${entry.steps.length}`),
+    );
+    list.append(item);
+  }
+  const card = element('section', 'card stages-card');
+  card.append(element('h2', 'card-title', 'Etapy'), list);
+  return card;
 }
 
 function nextStepsSection(plan, steps, today) {

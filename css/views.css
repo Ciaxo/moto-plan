@@ -556,6 +556,39 @@
   background: var(--accent-mid);
 }
 
+.stages-card {
+  display: none;
+}
+
+.stage-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(var(--stage-min), 1fr));
+  gap: var(--sp-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stage-column {
+  display: grid;
+  align-content: start;
+  gap: var(--sp-2);
+  overflow-wrap: anywhere;
+}
+
+.stage-name {
+  font-weight: var(--fw-semibold);
+}
+
+.stage-column[aria-current="step"] .stage-name {
+  color: var(--accent);
+}
+
+.stage-done {
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
 .progress-caption {
   color: var(--ink-2);
   font-size: var(--fs-14);
@@ -599,6 +632,11 @@
     gap: 0;
     border-radius: var(--r-xl);
     background: var(--surface);
+  }
+
+  .stages-card {
+    display: flex;
+    grid-column: 1 / -1;
   }
 
   .next-steps > .section-header {
