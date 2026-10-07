@@ -8,7 +8,7 @@ import {
   countDone, currentStage, isClosed, nextSteps, planStages, progress,
 } from '../lib/plan.js';
 import {
-  SVG_NS, button, dot, element, screenHeader, icon, percentBar,
+  button, dot, element, icon, percentBar, screenHeader, SVG_NS,
 } from '../ui/elements.js';
 import { clickedStep, stepRow, stepsGenitive, toggleStep } from './plan.js';
 import { openStepSheet } from './step-sheet.js';

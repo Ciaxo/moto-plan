@@ -4,9 +4,9 @@ import { backupAge, needsBackup } from '../lib/backup.js';
 import { formatDate, localDate } from '../lib/dates.js';
 import { nouns, plural } from '../lib/format.js';
 import { installedPacks } from '../lib/pack.js';
-import { button, dot, element, screenHeader, backLink, icon, segmented } from '../ui/elements.js';
-import { openConfirm } from '../ui/sheet.js';
 import { forgetTheme, setTheme } from '../theme.js';
+import { backLink, button, dot, element, icon, screenHeader, segmented } from '../ui/elements.js';
+import { openConfirm } from '../ui/sheet.js';
 
 const days = ['dzień', 'dni', 'dni'];
 const deleteText = 'Plan, pytania, budżet i ustawienia znikną z tego urządzenia. '

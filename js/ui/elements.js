@@ -1,4 +1,4 @@
-export const SVG_NS ='http://www.w3.org/2000/svg';
+export const SVG_NS = 'http://www.w3.org/2000/svg';
 const dueKinds = [['none', 'Brak'], ['year', 'Rok'], ['month', 'Miesiąc'], ['day', 'Dzień']];
 const kindByLength = { 0: 'none', 4: 'year', 7: 'month', 10: 'day' };
 // Desktop Firefox has no month picker and shows a plain text field, hence the pattern.

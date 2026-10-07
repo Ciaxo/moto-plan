@@ -6,7 +6,7 @@ import { addButton, button, checkbox, element, icon, screenHeader } from '../ui/
 import { openStageSheet } from './stage-sheet.js';
 import { openStepSheet } from './step-sheet.js';
 
-export const stepsGenitive =['kroku', 'kroków', 'kroków'];
+export const stepsGenitive = ['kroku', 'kroków', 'kroków'];
 const emptyText = 'Plan składa się z etapów, a każdy etap z kroków do odhaczenia. '
   + 'Zacznij od pierwszego etapu.';
 const expanded = new Set();

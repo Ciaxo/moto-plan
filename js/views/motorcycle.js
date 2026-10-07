@@ -1,7 +1,7 @@
 import { budgetSettings, budgetTotals, forecast } from '../lib/budget.js';
 import { localDate } from '../lib/dates.js';
 import { plural } from '../lib/format.js';
-import { element, screenHeader, icon } from '../ui/elements.js';
+import { element, icon, screenHeader } from '../ui/elements.js';
 
 const monthsGenitive = ['miesiąca', 'miesięcy', 'miesięcy'];
 
