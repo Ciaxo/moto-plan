@@ -98,6 +98,8 @@
   --sheet-max: 480px;
   --content-max: 1040px;
   --sidebar-width: 240px;
+  --card-min: 280px;
+  --stage-min: 120px;
 
   /* Motion */
   --dur-fast: 120ms;
