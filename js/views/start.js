@@ -50,13 +50,15 @@ function header(plan, current, today, action) {
   return screenHeader(current.stage.headline || current.stage.title, { eyebrow, action });
 }
 
+// Also for the same link in the side panel, which carries the same dot.
+export function dataLabel(warn) {
+  return warn ? 'Dane i ustawienia, brak aktualnej kopii' : 'Dane i ustawienia';
+}
+
 function settingsLink(warn) {
   const settings = element('a', 'icon-button');
   settings.href = '#/dane';
-  settings.setAttribute(
-    'aria-label',
-    warn ? 'Dane i ustawienia, brak aktualnej kopii' : 'Dane i ustawienia',
-  );
+  settings.setAttribute('aria-label', dataLabel(warn));
   settings.append(icon('settings'));
   if (warn) {
     settings.append(dot());

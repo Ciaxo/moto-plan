@@ -1,8 +1,10 @@
 import { loadAll, openDatabase } from './db.js';
+import { needsBackup } from './lib/backup.js';
+import { localDate } from './lib/dates.js';
 import { startRouter } from './router.js';
 import { startTheme } from './theme.js';
-import { element } from './ui/elements.js';
-import { renderStart } from './views/start.js';
+import { dot, element } from './ui/elements.js';
+import { dataLabel, renderStart } from './views/start.js';
 import { renderPlan } from './views/plan.js';
 import { renderKnowledge } from './views/knowledge.js';
 import { renderQuestion } from './views/question.js';
@@ -24,6 +26,7 @@ const databaseError = 'Nie da się otworzyć bazy danych. Przeglądarka nie pozw
 
 const main = document.querySelector('main');
 const tabs = document.querySelectorAll('nav a');
+const dataTab = document.querySelector('.tab-data');
 let data;
 let current;
 
@@ -37,6 +40,16 @@ function markTab(name) {
   }
 }
 
+// The panel is static HTML outside the screens, so its backup dot is updated with every screen.
+function markBackup() {
+  const warn = needsBackup(data, localDate(new Date()));
+  dataTab.querySelector('.dot')?.remove();
+  if (warn) {
+    dataTab.append(dot());
+  }
+  dataTab.setAttribute('aria-label', dataLabel(warn));
+}
+
 function show(entered) {
   const { name, id } = current;
   const screen = id === undefined
@@ -47,6 +60,7 @@ function show(entered) {
     main.replaceChildren(screen);
   }
   markTab(name);
+  markBackup();
 }
 
 function focusById(id) {
