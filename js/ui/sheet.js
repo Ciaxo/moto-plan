@@ -20,39 +20,49 @@ export function closeSheet() {
 
 export function onSubmit(form, save) {
   const submit = form.querySelector('[type="submit"]');
-  const error = element('p', 'form-error', 'Nie udało się zapisać. Spróbuj jeszcze raz.');
-  error.setAttribute('role', 'alert');
+  const error = errorLine('Nie udało się zapisać. Spróbuj jeszcze raz.');
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    // Disabling the button takes the focus away from it, to the page behind the sheet.
-    const hadFocus = document.activeElement === submit;
-    submit.disabled = true;
-    error.remove();
-    try {
-      await save();
-    } catch {
-      // The sheet stays open with everything typed in, so saving can simply be tried again.
-      submit.before(error);
-      submit.disabled = false;
-      if (hadFocus) {
-        submit.focus();
-      }
-      return;
+    if (await tryAction(submit, error, save)) {
+      closeSheet();
     }
-    closeSheet();
   });
 }
 
+// Replacing all data shows its own errors, so only deleting ever reaches the message here.
 export function openConfirm(heading, text, label, onConfirm) {
-  const confirm = button(label, 'button button-primary', () => {
-    confirm.disabled = true;
-    onConfirm();
-  });
+  const error = errorLine('Nie udało się usunąć. Spróbuj jeszcze raz.');
+  const confirm = button(label, 'button button-primary', () => tryAction(confirm, error, onConfirm));
   const cancel = button('Anuluj', 'button', closeSheet);
   const body = document.createDocumentFragment();
   body.append(element('p', null, text), confirm, cancel);
   openSheet(heading, body);
   cancel.focus();
+}
+
+async function tryAction(trigger, error, action) {
+  // Disabling the button takes the focus away from it, to the page behind the sheet.
+  const hadFocus = document.activeElement === trigger;
+  trigger.disabled = true;
+  error.remove();
+  try {
+    await action();
+    return true;
+  } catch {
+    // The sheet stays open with everything in it, so the action can simply be tried again.
+    trigger.before(error);
+    trigger.disabled = false;
+    if (hadFocus) {
+      trigger.focus();
+    }
+    return false;
+  }
+}
+
+function errorLine(text) {
+  const line = element('p', 'form-error', text);
+  line.setAttribute('role', 'alert');
+  return line;
 }
 
 export function openErrors(heading, errors) {
