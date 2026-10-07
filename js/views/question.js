@@ -7,6 +7,8 @@ import { openQuestionSheet } from './question-sheet.js';
 
 const statuses = [[false, 'Nie wiem'], [true, 'Umiem']];
 const NOTES_DELAY = 1000;
+const lostNotes = 'Notatka do pytania nie została zapisana. '
+  + 'Wróć do pytania i wpisz ją jeszcze raz.';
 // Everything the screen shows except the notes, which the text field itself holds.
 const shownFields = ['categoryId', 'question', 'answer', 'sourceTitle', 'sourceUrl', 'known'];
 
@@ -98,6 +100,11 @@ function notesCard(question) {
     shown = { ...shown, notes: field.value, notesAt: new Date().toISOString() };
     const saved = shown;
     save('questions', saved).then(() => showChanged(changed, saved), () => {
+      // Saved on leaving the screen, so there is no line to show the error and no next try.
+      if (!changed.isConnected) {
+        openSaveError(lostNotes);
+        return;
+      }
       // A newer save already carries the text and shows its own result.
       failed = shown === saved;
       changed.hidden = false;

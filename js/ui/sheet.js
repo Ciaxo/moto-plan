@@ -66,8 +66,8 @@ function errorLine(text) {
 }
 
 // For changes saved straight away, without a sheet of their own to show the error in.
-export function openSaveError() {
-  openErrors('Nie udało się zapisać', ['Zmiana nie została zapisana. Spróbuj jeszcze raz.']);
+export function openSaveError(text = 'Zmiana nie została zapisana. Spróbuj jeszcze raz.') {
+  openErrors('Nie udało się zapisać', [text]);
 }
 
 export function openErrors(heading, errors) {
