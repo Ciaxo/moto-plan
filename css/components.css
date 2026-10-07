@@ -107,6 +107,47 @@
   }
 }
 
+.update-bar {
+  position: fixed;
+  inset-inline: 0;
+  bottom: var(--nav-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  min-height: var(--update-bar);
+  padding-inline: var(--screen-pad);
+  background: var(--nav-bg);
+  border-top: var(--hairline) solid var(--line);
+}
+
+.update-bar:empty {
+  display: none;
+}
+
+.update-text {
+  font-weight: var(--fw-semibold);
+}
+
+body:has(.update-bar:not(:empty)) .screen {
+  padding-bottom: calc(var(--nav-height) + var(--update-bar) + var(--screen-pad));
+}
+
+@media (min-width: 900px) {
+  .update-bar {
+    left: var(--sidebar-width);
+    bottom: 0;
+    padding-inline: max(
+      var(--screen-pad),
+      (100% - var(--sidebar-width) - var(--content-max)) / 2 + var(--screen-pad)
+    );
+  }
+
+  body:has(.update-bar:not(:empty)) .screen {
+    padding-bottom: calc(var(--update-bar) + var(--screen-pad));
+  }
+}
+
 .screen-header {
   display: grid;
   grid-template-columns: 1fr;

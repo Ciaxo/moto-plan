@@ -73,3 +73,10 @@ async function respond(request) {
 self.addEventListener('install', (event) => event.waitUntil(install()));
 self.addEventListener('activate', (event) => event.waitUntil(removeOldCaches()));
 self.addEventListener('fetch', (event) => event.respondWith(respond(event.request)));
+
+// A new version takes over open pages only when the user asks for it on the update bar.
+self.addEventListener('message', (event) => {
+  if (event.data === 'skipWaiting') {
+    self.skipWaiting();
+  }
+});
