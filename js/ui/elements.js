@@ -38,7 +38,10 @@ export function screenHeader(title, { eyebrow, action } = {}) {
   if (eyebrow) {
     header.append(element('p', 'eyebrow', eyebrow));
   }
-  header.append(element('h1', 'screen-title', title));
+  const heading = element('h1', 'screen-title', title);
+  // Focusable from code, as the fallback after a redraw, but not on the way of the Tab key.
+  heading.tabIndex = -1;
+  header.append(heading);
   if (action) {
     header.append(action);
   }

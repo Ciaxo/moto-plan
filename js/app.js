@@ -85,8 +85,13 @@ async function redraw() {
   const active = main.contains(document.activeElement) ? document.activeElement : null;
   const focusedId = active?.closest('[data-id]')?.dataset.id;
   show(false);
-  if (focusedId) {
-    focusById(focusedId);
+  // Nothing to restore, or the question screen kept its content and the focused element with it.
+  if (!active || main.contains(active)) {
+    return;
+  }
+  // When nothing has the same data-id, as after the welcome card is gone, the title takes the focus.
+  if (!focusedId || !focusById(focusedId)) {
+    main.querySelector('h1')?.focus();
   }
 }
 
