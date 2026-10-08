@@ -221,4 +221,4 @@ tests/                  browser test page
 
 ## License
 
-Not chosen yet.
+MIT. See [LICENSE](LICENSE).
