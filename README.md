@@ -4,9 +4,11 @@ A small offline app for planning the road to a motorcycle licence and a first bi
 
 The interface is in Polish. It is built for phones first. From a window width of 900 px the bottom tab bar turns into a side panel with an extra link to the Data screen.
 
+Open the app at <https://ciaxo.github.io/moto-plan/>. It is tested in current Chrome on Android and in current Edge and Firefox on Windows. Other browsers may work, but are not tested.
+
 ## Status
 
-Early development.
+The first version is published and usable. Content pack export is the last feature planned for it.
 
 ### Progress
 
@@ -20,7 +22,7 @@ Early development.
 - [x] Start screen
 - [x] Desktop layout
 - [x] Installable, works offline
-- [ ] Published on GitHub Pages
+- [x] Published on GitHub Pages
 - [ ] Content pack export
 
 ## Principles
@@ -35,10 +37,12 @@ Early development.
 You need Python 3 or any other static file server.
 
 ```
+git clone https://github.com/Ciaxo/moto-plan.git
+cd moto-plan
 python -m http.server 8000
 ```
 
-Open `http://localhost:8000`.
+Open `http://localhost:8000`. Opening `index.html` straight from disk (a `file://` address) does not work, because the app is made of ES modules, which browsers load only from a server.
 
 The app registers a service worker, which serves the app files from its own cache even after they change on disk. While working on the code, tick DevTools → Application → Service workers → *Bypass for network* in Edge or Chrome, or reload with Ctrl+F5, which also skips the browser's HTTP cache. Service workers need a secure context: `localhost` works, an address such as `http://192.168.1.10:8000` does not, and there the app runs without offline support.
 
@@ -144,6 +148,14 @@ With two or more goals you can switch between one goal (*Jeden cel*) and separat
 
 Money assigned above a goal's value stays with that goal, so the last goal card shows what the whole budget is missing and the estimated purchase month.
 
+## Where your data is
+
+Everything you enter is stored in the browser, in an IndexedDB database named `moto-plan`. The theme setting is also copied to `localStorage` under `moto-plan-theme`, so the app can apply it before the database opens. Nothing is sent anywhere.
+
+The data belongs to one browser on one device, at one address. Another browser on the same device, another device or another address starts empty. The installed app shares its data with the browser it was installed from. A private window gets its own data, which is gone when the window closes. To keep a safe copy or to move your data to another device, export a backup.
+
+When a save fails, for example because the device is out of space, the app says so. A form stays open with what you typed, and a ticked box or a switch goes back to its previous state.
+
 ## Backups
 
 Backups live on the Data screen, which opens from the settings icon on the Start screen, or on a wide screen from the side panel.
@@ -189,8 +201,6 @@ This repository contains code and a generic example only. Personal backups and p
 If you host the app on your own GitHub Pages, keep in mind that the browser stores data per address, not per repository. The database, the theme setting and the offline files are shared by all your sites under `https://<account>.github.io`, and clearing site data for that address removes them for all of them.
 
 ## Project layout
-
-Target layout. Files appear as the app is built.
 
 ```
 index.html              app shell
