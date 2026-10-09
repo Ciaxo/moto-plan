@@ -11,6 +11,8 @@ import { openConfirm, openErrors, openSaveError } from '../ui/sheet.js';
 const days = ['dzień', 'dni', 'dni'];
 const deleteText = 'Plan, pytania, budżet i ustawienia znikną z tego urządzenia. '
   + 'Jeśli chcesz je zachować, najpierw wyeksportuj kopię.';
+const waitingText = 'Moto Plan jest otwarty w innej karcie albo oknie. '
+  + 'Zamknij go tam, a dane usuną się same.';
 
 const keptText = 'Przeglądarka zachowa te dane, nawet gdy zabraknie miejsca na urządzeniu.';
 const mayRemoveText = 'Przeglądarka może usunąć te dane, gdy zabraknie miejsca na urządzeniu. '
@@ -162,7 +164,9 @@ function deleteButton() {
 // A reload opens a fresh empty database and starts the theme from scratch.
 async function deleteAll() {
   try {
-    await deleteDatabase();
+    await deleteDatabase(() => {
+      openErrors('Usuwanie czeka', [waitingText]);
+    });
   } catch {
     // The connection is closed by then, so nothing can be saved again until the page reloads.
     openErrors('Nie udało się usunąć danych', ['Odśwież stronę i spróbuj jeszcze raz.']);

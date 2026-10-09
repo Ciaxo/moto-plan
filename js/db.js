@@ -20,9 +20,13 @@ export async function openDatabase() {
   };
 }
 
-export async function deleteDatabase() {
+// A connection that ignores versionchange, such as a tab frozen in the background on Android,
+// blocks the deletion until it closes. The request cannot be cancelled, so it just waits.
+export async function deleteDatabase(onBlocked) {
   db.close();
-  await requestDone(indexedDB.deleteDatabase(NAME));
+  const request = indexedDB.deleteDatabase(NAME);
+  request.onblocked = onBlocked;
+  await requestDone(request);
 }
 
 export function getAll(store) {
