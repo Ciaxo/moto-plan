@@ -24,6 +24,8 @@ const screens = {
 
 const databaseError = 'Nie da się otworzyć bazy danych. Przeglądarka nie pozwala tej stronie '
   + 'zapisywać danych na urządzeniu. Zezwól na to w ustawieniach witryny i odśwież stronę.';
+const databaseWait = 'Baza danych czeka na inne okno Moto Plan. '
+  + 'Zamknij aplikację w innych kartach i oknach.';
 
 const main = document.querySelector('main');
 const tabs = document.querySelectorAll('nav a');
@@ -106,11 +108,15 @@ async function requestPersistence() {
 async function start() {
   // Before the database, so the app files are cached even when the database cannot open.
   startUpdates();
+  // Opening waits behind a deletion that another window blocks, with no event to tell.
+  const waiting = setTimeout(() => main.replaceChildren(element('p', 'card', databaseWait)), 2000);
   try {
     await openDatabase();
   } catch {
     main.replaceChildren(element('p', 'card', databaseError));
     return;
+  } finally {
+    clearTimeout(waiting);
   }
   await startTheme();
   data = await loadAll();
