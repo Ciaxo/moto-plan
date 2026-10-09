@@ -573,6 +573,7 @@ legend.field-label {
   border-radius: var(--r-sheet) var(--r-sheet) 0 0;
   background: var(--surface);
   color: var(--ink);
+  overscroll-behavior: contain;
   translate: 0 100%;
   transition:
     translate var(--dur-sheet) var(--ease),
@@ -582,6 +583,16 @@ legend.field-label {
 
 .sheet[open] {
   translate: 0 0;
+}
+
+/* A modal dialog blocks clicks on the page behind it, but not scrolling. The reserved scrollbar
+   space keeps the centered content still when the scrollbar goes away. */
+:root {
+  scrollbar-gutter: stable;
+}
+
+:root:has(.sheet[open]) {
+  overflow: hidden;
 }
 
 .sheet::backdrop {
