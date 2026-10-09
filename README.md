@@ -186,9 +186,11 @@ The Data screen shows when you last exported a backup. When there has never been
 
 **Delete all data** (*Usuń wszystkie dane*) at the bottom of the Data screen removes the database and the stored theme from this browser after two confirmations. It cannot be undone, so export a backup first if you want to keep anything. The app files kept for offline use stay.
 
+Other tabs and windows of the app reload by themselves. One that cannot, such as a tab Chrome on Android has frozen in the background, makes the deletion wait until it is closed. The app then says *Usuwanie czeka*, and opening the app again in the meantime shows a note instead of the screens. The deletion cannot be stopped and finishes on its own once that tab is closed.
+
 ## Offline use and updates
 
-Browsers that support it offer to install the app, for example with the install icon in the address bar of Edge. After the first visit a service worker keeps every app file in the browser, so the app opens and works without a connection, data included.
+Browsers that support it offer to install the app. In Edge on a computer, use the install icon in the address bar. In Chrome on Android, open the ⋮ menu, choose the install item (*Zainstaluj i utwórz skrót* in Polish Chrome) and then *Install* (*Zainstaluj*). Do not choose *Create shortcut* (*Utwórz skrót*): a shortcut opens the app as a browser tab. After the first visit a service worker keeps every app file in the browser, so the app opens and works without a connection, data included.
 
 The app checks for a new version when it opens and when you come back to it. A new version is downloaded in the background, and then a bar with *Jest nowa wersja* and a *Odśwież* button appears above the navigation, or at the bottom of the window on a wide screen. The new version starts when you press the button, or by itself once every tab of the app has been closed.
 
