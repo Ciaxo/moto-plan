@@ -5,7 +5,7 @@ import {
 import { addMonths, daysBetween, formatDate, formatMonth, localDate } from '../js/lib/dates.js';
 import { formatAmount, plural, pluralForm } from '../js/lib/format.js';
 import { nextOrder } from '../js/lib/order.js';
-import { editRecord, mergePack, validatePack } from '../js/lib/pack.js';
+import { buildPack, editRecord, mergePack, validatePack } from '../js/lib/pack.js';
 import {
   currentStage, isClosed, nextSteps, planStages, progress,
 } from '../js/lib/plan.js';
@@ -442,6 +442,114 @@ test('edycja: zapis bez zmian nie daje nic do zapisania', () => {
 test('edycja: własny krok nie dostaje userModified', () => {
   const own = { ...step('k9', 's1', 1), title: 'Mój krok', origin: 'user', userModified: false };
   assertEqual(editRecord('steps', own, { title: 'Mój nowy krok' }).userModified, false);
+});
+
+const savedAt = '2026-10-01T12:00:00.000Z';
+const ownInfo = { packId: 'own', title: 'Moja paczka', version: 2 };
+
+// Content as the app keeps it: loaded from a pack, then ticked off, edited, deleted and added to.
+function appData() {
+  const data = imported(smallPack());
+  const own = { origin: 'user', packId: null, userModified: false };
+  Object.assign(data.steps[0], {
+    title: 'Egzamin teoretyczny',
+    userModified: true,
+    done: true,
+    doneAt: savedAt,
+    note: 'Zabrać dowód',
+  });
+  Object.assign(data.questions[0], { known: true, knownAt: savedAt, notes: 'Obowiązkowe' });
+  data.steps.push({
+    ...own, id: 'k2', stageId: 's1', order: 2, title: 'Zapisać się na kurs', dueDate: '',
+    cost: null, hint: '', done: false, doneAt: null, note: '',
+  });
+  data.questions.push(
+    {
+      ...own, id: 'q2', categoryId: 'c1', order: 2, question: 'Ile kosztuje AC?', answer: 'Zależy.',
+      sourceTitle: '', sourceUrl: '', known: false, knownAt: null, notes: '', notesAt: null,
+    },
+    { ...own, id: 'q3', categoryId: 'c1', order: 3, question: 'Usunięte', deleted: true },
+  );
+  data.goals.push({ ...own, id: 'g2', order: 2, title: 'Mój cel' });
+  data.costs.push({
+    ...own, id: 'x2', order: 2, title: 'Kask', amount: 1200, group: 'once', goalId: 'g2',
+    date: '2027', status: 'paid', paidAt: savedAt, note: 'Na wyprzedaży',
+  });
+  data.deposits.push({ ...own, id: 'd1', date: '2026-10-01', amount: 500, goalId: null, note: '' });
+  data.settings.push({ id: 'goalMode', value: 'split' });
+  for (const record of Object.values(data).flat()) {
+    Object.assign(record, { createdAt: savedAt, updatedAt: savedAt, deleted: !!record.deleted });
+  }
+  return data;
+}
+
+test('eksport paczki: tylko pola treści nieusuniętych rekordów, bez wpłat i ustawień', () => {
+  assertEqual(buildPack(appData(), ownInfo), {
+    app: 'moto-plan',
+    type: 'content',
+    formatVersion: 1,
+    packId: 'own',
+    title: 'Moja paczka',
+    version: 2,
+    stages: [{ id: 's1', order: 1, title: 'Teoria', period: '', headline: '' }],
+    steps: [
+      {
+        id: 'k1', stageId: 's1', order: 1, title: 'Egzamin teoretyczny', dueDate: '2027-02',
+        cost: 59, hint: '',
+      },
+      {
+        id: 'k2', stageId: 's1', order: 2, title: 'Zapisać się na kurs', dueDate: '', cost: null,
+        hint: '',
+      },
+    ],
+    categories: [{ id: 'c1', order: 1, title: 'Przepisy' }],
+    questions: [
+      {
+        id: 'q1', categoryId: 'c1', order: 1, question: 'Czym jest OC?', answer: '',
+        sourceTitle: '', sourceUrl: '',
+      },
+      {
+        id: 'q2', categoryId: 'c1', order: 2, question: 'Ile kosztuje AC?', answer: 'Zależy.',
+        sourceTitle: '', sourceUrl: '',
+      },
+    ],
+    goals: [{ id: 'g1', order: 1, title: 'Prawo jazdy' }, { id: 'g2', order: 2, title: 'Mój cel' }],
+    costs: [
+      { id: 'x1', order: 1, title: 'Kurs', amount: 3500, group: 'once', goalId: 'g1', date: '' },
+      {
+        id: 'x2', order: 2, title: 'Kask', amount: 1200, group: 'once', goalId: 'g2', date: '2027',
+      },
+    ],
+  });
+});
+
+test('eksport paczki: kroki etapami, bez kroków usuniętego etapu', () => {
+  const data = appData();
+  data.stages.push(
+    { id: 's2', order: 2, title: 'Jazdy', createdAt: savedAt, deleted: false },
+    { id: 's9', order: 3, title: 'Usunięty', createdAt: savedAt, deleted: true },
+  );
+  data.steps.push(
+    { id: 'k3', stageId: 's2', order: 1, title: 'Jazda', createdAt: savedAt, deleted: false },
+    { id: 'k9', stageId: 's9', order: 1, title: 'Bez etapu', createdAt: savedAt, deleted: false },
+  );
+  assertEqual(buildPack(data, ownInfo).steps.map((record) => record.id), ['k1', 'k2', 'k3']);
+});
+
+test('eksport paczki: tam i z powrotem przez pustą aplikację daje tę samą treść', () => {
+  const pack = buildPack(appData(), ownInfo);
+  assertEqual(validatePack(pack, emptyData()), []);
+  const copy = imported(pack);
+  assertEqual(buildPack(copy, ownInfo), pack);
+  const helmet = copy.costs.find((record) => record.id === 'x2');
+  assertEqual(
+    [copy.goals.find((record) => record.id === helmet.goalId).title, helmet.status, helmet.note],
+    ['Mój cel', 'planned', ''],
+  );
+  assertEqual(
+    [copy.steps[0].done, copy.steps[0].note, copy.questions[0].notes, copy.deposits.length],
+    [false, '', '', 0],
+  );
 });
 
 // Noon UTC falls on the same local date in nearly every time zone.

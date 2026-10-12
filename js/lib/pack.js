@@ -1,3 +1,5 @@
+import { ordered } from './order.js';
+
 const FORMAT_VERSION = 1;
 const GROUPS = ['once', 'yearly', 'hidden'];
 const DATE = /^(\d{4}(-\d{2}(-\d{2})?)?)?$/;
@@ -88,6 +90,30 @@ export function validatePack(pack, data) {
 
 export function installedPacks(data) {
   return data.settings.find((record) => record.id === 'packs')?.value ?? {};
+}
+
+export function buildPack(data, { packId, title, version }) {
+  const pack = {
+    app: 'moto-plan',
+    type: 'content',
+    formatVersion: FORMAT_VERSION,
+    packId,
+    title,
+    version,
+  };
+  // Parents come before their children in COLLECTIONS, so each parent list is ready when needed.
+  for (const [collection, { fields }] of Object.entries(COLLECTIONS)) {
+    const records = ordered(data[collection]);
+    const link = fields.find((field) => FIELDS[field].target);
+    // A record without its parent is not shown in the app and would make the pack invalid.
+    const kept = link
+      ? pack[FIELDS[link].target].flatMap((parent) => (
+        records.filter((record) => record[link] === parent.id)
+      ))
+      : records;
+    pack[collection] = kept.map((record, index) => contentOf(record, fields, index));
+  }
+  return pack;
 }
 
 function packErrors(pack, data) {
