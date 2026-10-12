@@ -92,6 +92,10 @@ export function installedPacks(data) {
   return data.settings.find((record) => record.id === 'packs')?.value ?? {};
 }
 
+export function ownPack(data) {
+  return data.settings.find((record) => record.id === 'ownPack')?.value;
+}
+
 export function buildPack(data, { packId, title, version }) {
   const pack = {
     app: 'moto-plan',

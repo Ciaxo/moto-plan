@@ -80,7 +80,7 @@ function summary(pack, installed, { changes, counts }) {
   return body;
 }
 
-function packContents(pack) {
+export function packContents(pack) {
   const parts = [`Wersja ${pack.version}`];
   for (const [collection, forms] of Object.entries(nouns)) {
     const count = pack[collection]?.length ?? 0;

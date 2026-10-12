@@ -1,4 +1,4 @@
-import { exportBackup, importFile } from '../backup.js';
+import { exportBackup, importFile, openPackExport } from '../backup.js';
 import { deleteDatabase } from '../db.js';
 import { backupAge, needsBackup } from '../lib/backup.js';
 import { formatDate, localDate } from '../lib/dates.js';
@@ -98,7 +98,11 @@ function contentCard(data, today) {
   }
   const loadPack = button('Wczytaj paczkę treści', 'button button-secondary', importFile);
   loadPack.dataset.id = 'import-pack';
-  card.append(loadPack);
+  const exportPack = button('Eksportuj treść jako paczkę', 'button button-secondary', () => {
+    openPackExport(data);
+  });
+  exportPack.dataset.id = 'export-pack';
+  card.append(loadPack, exportPack);
   return card;
 }
 
