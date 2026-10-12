@@ -3,6 +3,7 @@ import { getOne, save } from './db.js';
 const KEY = 'moto-plan-theme';
 const darkScheme = matchMedia('(prefers-color-scheme: dark)');
 const themeColor = document.querySelector('meta[name="theme-color"]');
+const standalone = matchMedia('(display-mode: standalone)').matches;
 let current = 'system';
 
 export async function setTheme(theme) {
@@ -43,5 +44,6 @@ function applyTheme() {
   const dark = current === 'dark' || (current === 'system' && darkScheme.matches);
   const root = document.documentElement;
   root.dataset.theme = dark ? 'dark' : 'light';
-  themeColor.content = getComputedStyle(root).getPropertyValue('--bg').trim();
+  const token = standalone ? '--status-bar' : '--bg';
+  themeColor.content = getComputedStyle(root).getPropertyValue(token).trim();
 }

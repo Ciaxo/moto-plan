@@ -12,6 +12,9 @@
   --surface-inset: #F2F3F1;
   --nav-bg: #FFFFFF;
   --scrim: rgba(20, 24, 27, 0.5);
+  /* The same in both themes and equal to theme_color in the manifest: Chrome on Android paints
+     the installed app's status bar from the manifest but picks icon colours from the meta tag. */
+  --status-bar: #0F1214;
 
   /* Text */
   --ink: #14181B;
