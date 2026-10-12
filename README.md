@@ -8,7 +8,7 @@ Open the app at <https://ciaxo.github.io/moto-plan/>. It is tested in current Ch
 
 ## Status
 
-The first version is published and usable. Content pack export is the last feature planned for it.
+The first version is complete and published.
 
 ### Progress
 
@@ -23,7 +23,7 @@ The first version is published and usable. Content pack export is the last featu
 - [x] Desktop layout
 - [x] Installable, works offline
 - [x] Published on GitHub Pages
-- [ ] Content pack export
+- [x] Content pack export
 
 ## Principles
 
@@ -111,6 +111,16 @@ Keep `packId` and record ids stable and raise `version`. Before saving, the app 
 Loading the same version again changes nothing. A version older than the one already loaded is rejected. A pack with a different `packId` is added next to the content you already have.
 
 A pack is data only. Its text is shown as plain text. Packs never contain deposits or settings.
+
+### Sharing your content
+
+To share your plan with someone, use *Eksportuj treść jako paczkę* on the Data screen. You give the pack a name, and the app saves a file named `moto-plan-paczka-YYYY-MM-DD.json`, which the other person loads like any content pack.
+
+The file holds every stage, step, category, question, goal and cost that is not deleted, with the fields from the table above only. Your progress, notes, statuses, payment dates, deposits and settings stay out. It is the whole content of the app, costs included, whichever pack it came from and whether you added it yourself, so look through the file before you share it. A record whose stage, category or goal is not in the file, such as a step of a deleted stage, is left out, because the pack would be rejected without it.
+
+The app remembers the pack's `packId`. Every later export keeps it and raises `version` by one, so the recipient gets a newer version of the same pack and the rules in [Updating a pack](#updating-a-pack) apply. The `packId` is kept in backups, so exporting on another device continues the same pack. After *Usuń wszystkie dane* the next export starts a new pack, which the recipient gets next to the old one.
+
+Record ids stay as they are in the app. A recipient who already has a pack with the same ids gets those entries merged instead of doubled: entries they have not edited or deleted take the content from your file, and their progress stays. The app still says the content will be added next to what is there. The counts in the summary show what actually happens. An entry you delete before the next export stays with a recipient who already has it.
 
 ## Start
 
